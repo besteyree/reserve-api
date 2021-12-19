@@ -20,9 +20,6 @@ class Table extends Model
 
     public function getUserAttribute()
     {
-        if(isset($this->user_id[0]))
-            return FilledReservation::find($this->user_id[0]);
-
-        return '';
+        return FilledReservation::find($this->user_id) ?? null;
     }
 }
