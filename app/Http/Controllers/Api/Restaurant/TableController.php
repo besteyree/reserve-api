@@ -61,7 +61,7 @@ class TableController extends Controller
     }
 
     public function statusChange(Request $request) {
-        try{
+        // try{
 
             foreach($request->table as $table) {
                 Table::find($table)
@@ -84,19 +84,15 @@ class TableController extends Controller
 
             return \Response::success(Restaurant::with('floor:id,title,restaurant_id', 'floor.table:id,title,no_of_occupany,floor_id,type_id,status,user_id', 'floor.table.tableType:id,title')->find(1), 'Table Reserved Successfully');
 
-        }catch(\Exception $e) {
-            \Response::failed($e, 'Table Reserved failed');
-        }
+        // }catch(\Exception $e) {
+        //     \Response::failed($e, 'Table Reserved failed');
+        // }
     }
 
     public function checkout($id)
     {
         try{
-            $tableId = Table::get()
-            ->map(function($row) use ($id) {
-                if(isset($row->user_id[0]) && $row->user_id[0] == $id)
-                    return $row->id;
-            })->filter()->values();
+            $tableId = Table::where('user_id', $id)->get();
 
 
             Table::whereIn('id', $tableId)->update([
