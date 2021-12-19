@@ -33,7 +33,7 @@ class SendConfirmEmail implements ShouldQueue
      */
     public function handle()
     {
-        \Mail::to($this->account)
+        \Mail::to($this->account->email)
         ->send(new ConfirmEmail($this->account->email, $this->account->name));
     }
 }
