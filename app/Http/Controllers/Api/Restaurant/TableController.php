@@ -96,7 +96,7 @@ class TableController extends Controller
 
             Table::whereIn('id', $tableId)->update([
                 'status' => 0,
-                'user_id' => ''
+                'user_id' => null
             ]);
 
             FilledReservation::find($id)
