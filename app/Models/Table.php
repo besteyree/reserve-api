@@ -10,7 +10,6 @@ class Table extends Model
     use HasFactory;
     protected $guarded = [];
 
-    protected $casts = ['user_id' => 'array'];
     protected $appends = ['user'];
 
     public function tableType()
