@@ -14,7 +14,7 @@ class AddUserIdToTables extends Migration
     public function up()
     {
         Schema::table('tables', function (Blueprint $table) {
-            $table->json('user_id');
+            $table->bigInteger('user_id')->nullable();
         });
     }
 

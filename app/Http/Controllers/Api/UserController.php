@@ -14,7 +14,7 @@ class UserController extends Controller
     public function index()
     {
         $user = User::query();
-        $user->with('restaurant.floor:id,title,restaurant_id', 'restaurant.floor.table:id,title,no_of_occupany,floor_id,type_id,status,user_id', 'restaurant.floor.table.tableType:id,title');
+        $user->with('restaurant.floor:id,title,restaurant_id', 'restaurant.floor.table:id,title,no_of_occupany,floor_id,type_id,status,user_id', 'restaurant.floor.table.tableType:id,title', 'restaurant.floor.table.user');
 
         if(auth()->user()->user_type == 1){
             if(\request('user_type'))
@@ -46,7 +46,7 @@ class UserController extends Controller
 
     public function login(Request $request)
     {
-        $user = User::with('restaurant.floor:id,title,restaurant_id', 'restaurant.floor.table:id,title,no_of_occupany,floor_id,type_id,status,user_id', 'restaurant.floor.table.tableType:id,title')
+        $user = User::with('restaurant.floor:id,title,restaurant_id', 'restaurant.floor.table:id,title,no_of_occupany,floor_id,type_id,status,user_id', 'restaurant.floor.table.tableType:id,title', 'restaurant.floor.table.user')
             ->where('email', $request->email)->first();
 
         if (! $user) {
