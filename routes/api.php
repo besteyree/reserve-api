@@ -45,6 +45,7 @@ Route::group(['middleware' => 'auth:sanctum'], function () {
     // reservation related
     Route::get('reservation/{id?}', [ReservationController::class, 'index']);
     Route::post('checkout/{id?}', [TableController::class, 'checkout']);
+    Route::post('checkout-one/{id}/{user_id}', [TableController::class, 'checkoutOne']);
     Route::delete('delete/{id?}', [ReservationController::class, 'destroy']);
 
 });
