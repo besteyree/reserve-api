@@ -67,7 +67,7 @@ class TableController extends Controller
                 Table::find($table)
                 ->update([
                     'status' => $request->status,
-                    'user_id' => array($request->user_id),
+                    'user_id' => $request->user_id,
                 ]);
             }
 
