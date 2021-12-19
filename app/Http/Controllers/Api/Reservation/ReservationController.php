@@ -165,7 +165,7 @@ class ReservationController extends Controller
             }
         }
 
-        try{
+        // try{
 
             $input = $request->validated();
             $input['restaurant_id'] = auth()->check() ? auth()->user()->restaurant_id : 1;
@@ -173,9 +173,9 @@ class ReservationController extends Controller
 
             return \Response::success($restaurant, "Thank You! Reservation sent for Contirmation.");
 
-        }catch(Exception $e) {
-            return \Response::failed($e, 'Floor Updated failed');
-        }
+        // }catch(Exception $e) {
+        //     return \Response::failed($e, 'Floor Updated failed');
+        // }
     }
 
     public function destroy($id)
