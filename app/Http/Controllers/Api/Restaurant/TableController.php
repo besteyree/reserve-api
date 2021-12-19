@@ -117,7 +117,7 @@ class TableController extends Controller
     public function checkoutOne($id, $user_id)
     {
 
-        // try{
+        try{
             $tableId = Table::find($id)->update([
                 'status' => 0,
                 'user_id' => null
@@ -134,8 +134,8 @@ class TableController extends Controller
                 'rmTable' => Table::where('id', $tableId)->get(),
                 'restaurant' => Restaurant::with('floor:id,title,restaurant_id', 'floor.table:id,title,no_of_occupany,floor_id,type_id,status,user_id', 'floor.table.tableType:id,title', 'floor.table.user')->find(1)
             ], 'Checkout Success');
-        // }catch(\Exception $e) {
-        //     return \Response::failed($e, 'Checkout failed');
-        // }
+        }catch(\Exception $e) {
+            return \Response::failed($e, 'Checkout failed');
+        }
     }
 }
