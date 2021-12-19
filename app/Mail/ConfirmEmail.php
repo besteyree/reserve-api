@@ -31,7 +31,10 @@ class ConfirmEmail extends Mailable
      */
     public function build()
     {
-        return $this->view('email.confirmed')
+        return $this->view('email.confirmed', [
+            'disruptedEmailAddress' => $this->disruptedEmailAddress,
+            'name' => $this->name
+        ])
         ->subject('SHAKESBIERRE - Reservation Confirmation');
     }
 }
