@@ -14,4 +14,16 @@ class FilledReservation extends Model
     protected $casts = [
         'date' => 'datetime',
     ];
+
+    protected $appends = ['table'];
+
+    public function getTableAttribute()
+    {
+        return Table::get()
+        ->map(function($row){
+            if(isset($row->user_id[0]) == $this->id) {
+                return $row;
+            }
+        });
+    }
 }
