@@ -16,12 +16,12 @@ class ConfirmEmail extends Mailable
      *
      * @return void
      */
-    public function __construct(
-        public string $disruptedEmailAddress,
-        public string $name
-    )
+    protected string $disruptedEmailAddress;
+    protected string $name;
+    public function __construct( $disruptedEmailAddress, $name )
     {
-
+        $this->disruptedEmailAddress = $disruptedEmailAddress;
+        $this->name = $name;
     }
 
     /**
