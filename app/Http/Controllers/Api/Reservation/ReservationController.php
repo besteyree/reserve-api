@@ -160,7 +160,7 @@ class ReservationController extends Controller
                     dispatch(new SendConfirmEmail(FilledReservation::find($id)));
                 }
 
-                return \Response::success(Restaurant::with('floor:id,title,restaurant_id', 'floor.table:id,title,no_of_occupany,floor_id,type_id,status,user_id', 'floor.table.tableType:id,title')->find(1), 'Reservation Updated Successfully');
+                return \Response::success(Restaurant::with('floor:id,title,restaurant_id', 'floor.table:id,title,no_of_occupany,floor_id,type_id,status,user_id', 'floor.table.tableType:id,title', 'floor.table.user')->find(1), 'Reservation Updated Successfully');
 
             }catch(\Exception $e) {
                 return \Response::failed($e, 'Reservation Updated failed');
