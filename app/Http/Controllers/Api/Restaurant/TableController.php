@@ -82,7 +82,7 @@ class TableController extends Controller
                 'confirmed_date' => now()
             ]);
 
-            return \Response::success(Restaurant::with('floor:id,title,restaurant_id', 'floor.table:id,title,no_of_occupany,floor_id,type_id,status,user_id', 'floor.table.tableType:id,title')->find(1), 'Table Reserved Successfully');
+            return \Response::success(Restaurant::with('floor:id,title,restaurant_id', 'floor.table:id,title,no_of_occupany,floor_id,type_id,status,user_id', 'floor.table.tableType:id,title', 'floor.table.user')->find(1), 'Table Reserved Successfully');
 
         }catch(\Exception $e) {
             \Response::failed($e, 'Table Reserved failed');
@@ -106,7 +106,7 @@ class TableController extends Controller
 
             return \Response::success([
                 'rmTable' => Table::whereIn('id', $tableId)->get(),
-                'restaurant' => Restaurant::with('floor:id,title,restaurant_id', 'floor.table:id,title,no_of_occupany,floor_id,type_id,status,user_id', 'floor.table.tableType:id,title')->find(1)
+                'restaurant' => Restaurant::with('floor:id,title,restaurant_id', 'floor.table:id,title,no_of_occupany,floor_id,type_id,status,user_id', 'floor.table.tableType:id,title', 'floor.table.user')->find(1)
             ], 'Checkout Success');
         }catch(\Exception $e) {
             return \Response::failed($e, 'Checkout failed');
