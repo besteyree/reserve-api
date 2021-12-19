@@ -34,7 +34,8 @@ Route::get('table-types/{id?}', [TableTypeController::class, 'index']);
 Route::group(['middleware' => 'auth:sanctum'], function () {
 
     // user related
-    Route::get('/', [UserController::class, 'index']);
+    Route::get('/user', [UserController::class, 'index']);
+    Route::get('/logout', [UserController::class, 'logout']);
 
     // restaurant related
     Route::get('restaurants', [RestaurantController::class, 'index']);
