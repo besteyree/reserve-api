@@ -19,6 +19,6 @@ class FilledReservation extends Model
 
     public function getTableAttribute()
     {
-        return Table::where('user_id', $this->id)->first() ?? null;
+        return Table::where('user_id', $this->id)->get() ?? null;
     }
 }
