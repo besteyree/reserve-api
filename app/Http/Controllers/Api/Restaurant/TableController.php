@@ -131,7 +131,7 @@ class TableController extends Controller
             }
 
             return \Response::success([
-                'rmTable' => Table::whereIn('id', $tableId)->get(),
+                'rmTable' => Table::where('id', $tableId)->get(),
                 'restaurant' => Restaurant::with('floor:id,title,restaurant_id', 'floor.table:id,title,no_of_occupany,floor_id,type_id,status,user_id', 'floor.table.tableType:id,title', 'floor.table.user')->find(1)
             ], 'Checkout Success');
         // }catch(\Exception $e) {
