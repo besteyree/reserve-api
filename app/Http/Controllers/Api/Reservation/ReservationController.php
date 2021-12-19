@@ -7,6 +7,7 @@ use App\Http\Requests\FilledReservationRequest;
 use App\Jobs\SendConfirmEmail;
 use App\Models\FilledReservation;
 use App\Models\Restaurant;
+use App\Models\Table;
 use Carbon\Carbon;
 use Exception;
 use Illuminate\Http\Request;
@@ -148,6 +149,7 @@ class ReservationController extends Controller
                 $input = $request->validated();
 
                 if($input['status'] == 4){
+                    // if()
                     $input['seated_date'] = now();
                 }
 
@@ -165,17 +167,17 @@ class ReservationController extends Controller
             }
         }
 
-        // try{
+        try{
 
             $input = $request->validated();
             $input['restaurant_id'] = auth()->check() ? auth()->user()->restaurant_id : 1;
             $restaurant = FilledReservation::create($input);
 
-            return \Response::success($restaurant, "Thank You! Reservation sent for Contirmation.");
+            return \Response::success($restaurant, "Thank You! Reservation sent for Confirmation.");
 
-        // }catch(Exception $e) {
-        //     return \Response::failed($e, 'Floor Updated failed');
-        // }
+        }catch(Exception $e) {
+            return \Response::failed($e, 'Reservation Updated failed');
+        }
     }
 
     public function destroy($id)
