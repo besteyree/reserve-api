@@ -19,11 +19,11 @@ class SendConfirmEmail implements ShouldQueue
      *
      * @return void
      */
-    public function __construct(
-        public $account
-    )
+
+    public $account;
+    public function __construct( $account )
     {
-        //
+        $this->account = $account;
     }
 
     /**
