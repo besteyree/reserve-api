@@ -10,15 +10,13 @@ class Table extends Model
     use HasFactory;
     protected $guarded = [];
 
-    protected $appends = ['user'];
-
     public function tableType()
     {
         return $this->belongsTo(TableType::class, 'type_id');
     }
 
-    public function getUserAttribute()
+    public function user()
     {
-        return null;
+        return $this->belongsTo(FilledReservation::class, 'user_id');
     }
 }
