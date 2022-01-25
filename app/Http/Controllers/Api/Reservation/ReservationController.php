@@ -20,7 +20,6 @@ class ReservationController extends Controller
         return FilledReservation::where('email', $email)->first();
     }
 
-
     public function index($id=null)
     {
         if($id){
@@ -149,7 +148,6 @@ class ReservationController extends Controller
                 $input = $request->validated();
 
                 if($input['status'] == 4){
-                    // if()
                     $input['seated_date'] = now();
                 }
 
@@ -184,5 +182,11 @@ class ReservationController extends Controller
     {
         FilledReservation::destroy($id);
         return \Response::success(null, "Reservation Successfully deleted!");
+    }
+
+    public function getUserFmPhone(Request $request)
+    {
+        return FilledReservation::where('phone', $request->phone)
+        ->first();
     }
 }
