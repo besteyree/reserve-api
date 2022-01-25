@@ -41,6 +41,9 @@ Route::group(['middleware' => 'auth:sanctum'], function () {
     Route::get('restaurants', [RestaurantController::class, 'index']);
     Route::post('restaurant/{id?}', [RestaurantController::class, 'storeUpdate']);
     Route::post('status', [TableController::class, 'statusChange']);
+    Route::post('search-user-phone', [ReservationController::class, 'getUserFmPhone']);
+
+    
 
     // reservation related
     Route::get('reservation/{id?}', [ReservationController::class, 'index']);
