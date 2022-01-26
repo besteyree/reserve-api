@@ -75,4 +75,8 @@ class UserController extends Controller
 
         return response()->success(null, "Logged out!");
     }
+
+    public function getUser($restaurant_id){
+        return User::where('restaurant_id', $restaurant_id)->get();
+    }
 }
