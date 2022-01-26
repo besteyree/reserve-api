@@ -35,7 +35,8 @@ class FilledReservationRequest extends FormRequest
             'no_of_occupancy' => 'required',
             'table_type_id' => 'nullable',
             'status' => 'nullable',
-            'is_walkin' => 'nullable'
+            'is_walkin' => 'nullable',
+            'source' => 'nullable'
         ];
     }
 }
