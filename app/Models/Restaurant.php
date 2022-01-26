@@ -11,7 +11,7 @@ class Restaurant extends Model
     use HasFactory;
     protected $guarded = [];
 
-    protected $appends = ['active_reservation', 'waiting', 'seated', 'checkout', 'reservation_graph', 'not_appear', 'walkin', 'reservation_count'];
+    protected $appends = ['customer', 'source', 'cus_group', 'active_reservation', 'waiting', 'seated', 'checkout', 'reservation_graph', 'not_appear', 'walkin', 'reservation_count'];
 
     public function tableType()
     {
@@ -69,6 +69,41 @@ class Restaurant extends Model
             'reservation' => $reservation,
             'walkin' => $walkin
         ];
+    }
+
+    public function getCusGroupAttribute()
+    {
+        $kids = FilledReservation::sum('kids');
+        $female = FilledReservation::sum('female');
+        $male = FilledReservation::sum('male');
+
+        return [
+            'kids' => $kids,
+            'female' => $female,
+            'male' => $male,
+        ];
+    }
+
+    public function getSourceAttribute()
+    {
+        $source = FilledReservation::get()
+        ->groupBy('source')
+        ->map(function($row){
+            return $row->count();
+        });
+
+        return $source;
+    }
+
+    public function getCustomerAttribute()
+    {
+        $customer = FilledReservation::get()
+        ->groupBy('visit')
+        ->map(function($row){
+            return $row->count();
+        });
+
+        return $customer;
     }
 
     public function getNotAppearAttribute()
