@@ -95,12 +95,24 @@ class Restaurant extends Model
         $dataWeek = collect();
 
         for($i=1; $i <= $endOfMonth ; $i++){
-            $total = FilledReservation::where('status', 5)
+            $total = FilledReservation::
+            where('is_walkin', 1)
             ->whereDay('date', $i)
             ->count();
             $dataDay->push([
                 'day' =>  Carbon::now()->format('M') .'-'. $i,
-                'total' => $total
+                'total' => $total,
+                'category' => 'Walkin'
+            ]);
+
+            $totalRes = FilledReservation::
+            where('is_walkin', null)
+            ->whereDay('date', $i)
+            ->count();
+            $dataDay->push([
+                'day' =>  Carbon::now()->format('M') .'-'. $i,
+                'total' => $totalRes,
+                'category' => 'Reservation'
             ]);
         }
 
@@ -120,12 +132,23 @@ class Restaurant extends Model
         );
 
         for($i=1; $i <= 12 ; $i++){
-            $total = FilledReservation::where('status', 5)
+            $total = FilledReservation::where('is_walkin', 1)
             ->whereMonth('date', $i)
             ->count();
             $dataMonth->push([
                 'day' =>  $month[$i],
-                'total' => $total
+                'total' => $total,
+                'category' => 'Walkin'
+            ]);
+
+            $totalRes = FilledReservation::
+            where('is_walkin', null)
+            ->whereMonth('date', $i)
+            ->count();
+            $dataMonth->push([
+                'day' =>  Carbon::now()->format('M') .'-'. $i,
+                'total' => $totalRes,
+                'category' => 'Reservation'
             ]);
         }
 
@@ -140,7 +163,7 @@ class Restaurant extends Model
         );
 
         for($i=1; $i <= 7 ; $i++){
-            $total = FilledReservation::where('status', 5)
+            $total = FilledReservation::where('is_walkin', 1)
             ->whereBetween('date', [Carbon::now()->startOfWeek()->format('Y-m-d') , Carbon::now()->endOfWeek()->format('Y-m-d')])
             ->get()
             ->map(function($row) {
@@ -150,7 +173,22 @@ class Restaurant extends Model
 
             $dataWeek->push([
                 'day' =>  $week[$i],
-                'total' => $total
+                'total' => $total,
+                'category' => 'Walkin'
+            ]);
+
+            $totalRes = FilledReservation::where('is_walkin', null)
+            ->whereBetween('date', [Carbon::now()->startOfWeek()->format('Y-m-d') , Carbon::now()->endOfWeek()->format('Y-m-d')])
+            ->get()
+            ->map(function($row) {
+                $row->day = date('D', strtotime($row->date));
+                return $row;
+            })->where('day', $week[$i])->count();
+
+            $dataWeek->push([
+                'day' =>  $week[$i],
+                'total' => $totalRes,
+                'category' => 'Reservation'
             ]);
         }
 
