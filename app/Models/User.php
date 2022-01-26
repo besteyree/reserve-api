@@ -47,9 +47,11 @@ class User extends Authenticatable
 
     public function restaurant()
     {
-        // if($this->restaurant_id)
+        if($this->user_type == 2)
+            return $this->hasMany(Restaurant::class);
+        
         return $this->belongsTo(Restaurant::class, 'restaurant_id');
 
-        // return $this->hasMany(Restaurant::class);
+
     }
 }
