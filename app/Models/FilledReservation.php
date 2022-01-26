@@ -15,10 +15,15 @@ class FilledReservation extends Model
         'date' => 'datetime',
     ];
 
-    protected $appends = ['table'];
+    protected $appends = ['table', 'visit'];
 
     public function getTableAttribute()
     {
         return Table::where('user_id', $this->id)->get() ?? null;
+    }
+
+    public function getVisitAttribute()
+    {
+        return FilledReservation::where('phone', $this->phone)->count() ?? 0;
     }
 }
