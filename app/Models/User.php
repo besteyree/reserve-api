@@ -48,7 +48,7 @@ class User extends Authenticatable
     public function restaurant()
     {
         if($this->restaurant_id)
-            return Restaurant::find($this->restaurant_id);
+            return $this->belongsTo(Restaurant::class, 'restaurat_id');
 
         return $this->hasMany(Restaurant::class);
     }
