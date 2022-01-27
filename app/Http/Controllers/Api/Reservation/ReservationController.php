@@ -172,9 +172,12 @@ class ReservationController extends Controller
             $input['restaurant_id'] = auth()->check() ? auth()->user()->restaurant_id : 1;
             $restaurant = FilledReservation::create($input);
 
+        
             $message = $input['name'].' Just asked for reservation';
 
-            foreach(DeviceToken::get() as $get){
+            foreach(DeviceToken::get() as $data){
+
+                $get = $data->token;
                 $curl = curl_init();
 
                 curl_setopt_array($curl, array(
