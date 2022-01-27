@@ -74,13 +74,11 @@ class Restaurant extends Model
     public function getCusGroupAttribute()
     {
         $kids = FilledReservation::sum('kids');
-        $female = FilledReservation::sum('female');
-        $male = FilledReservation::sum('male');
+        $adults = FilledReservation::sum('adults');
 
         return [
             'kids' => $kids,
-            'female' => $female,
-            'male' => $male,
+            'adults' => $adults,
         ];
     }
 
