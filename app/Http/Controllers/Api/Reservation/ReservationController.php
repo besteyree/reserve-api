@@ -172,8 +172,7 @@ class ReservationController extends Controller
             $input['restaurant_id'] = auth()->check() ? auth()->user()->restaurant_id : 1;
             $restaurant = FilledReservation::create($input);
 
-        
-            $message = $input['name'].' Just asked for reservation';
+            $message = 'Got New Reservation from '.$input['name'];
 
             foreach(DeviceToken::get() as $data){
 
@@ -188,7 +187,7 @@ class ReservationController extends Controller
                 CURLOPT_TIMEOUT => 30,
                 CURLOPT_HTTP_VERSION => CURL_HTTP_VERSION_1_1,
                 CURLOPT_CUSTOMREQUEST => "POST",
-                CURLOPT_POSTFIELDS => "{\n    \"notification\": {\n        \"title\": \"New Reservation\",\n        \"body\": \"$message\",\n        \"click_action\": \"http://localhost:3000/\",\n        \"icon\": \"https://i.imgur.com/5zO5cce.png\"\n    },\n    \"to\": \"$get\"\n}",
+                CURLOPT_POSTFIELDS => "{\n    \"notification\": {\n        \"title\": \"New Reservation\",\n        \"body\": \"$message\",\n        \"click_action\": \"https://reserve.whitealba.in/restaurant/dashboard?tab=1\",\n        \"icon\": \"https://i.imgur.com/WXQJdb1.png\"\n    },\n    \"to\": \"$get\"\n}",
                 CURLOPT_HTTPHEADER => array(
                     "authorization: key=AAAAuJEaeRY:APA91bEpgUMWlt1Z_8n_JG5cfIOrkpuXKYmFDMDHSHeCXgNFwWA_Y-hxU8MmwRGNZB5ltaujEE_8k_KtrdhHXBYg7bO02--zCKciUgk1GmTdFJDG133RT_PiE5v0vuPXKH1dTVk789Jw",
                     "cache-control: no-cache",
@@ -230,10 +229,12 @@ class ReservationController extends Controller
 
     public function saveToken(Request $request){
 
-        DeviceToken::create([
-            'device' => $request->device,
-            'token' => $request->token,
-        ]);
+        if(!DeviceToken::where('token', $request->token)->exists()){
+            DeviceToken::create([
+                'device' => $request->device,
+                'token' => $request->token,
+            ]);
+        }
 
         return 'success';
     }
