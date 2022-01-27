@@ -30,6 +30,8 @@ Route::get('get-reservation/{email}', [ReservationController::class, 'getReserva
 // open api
 Route::get('table-types/{id?}', [TableTypeController::class, 'index']);
 
+//save token 
+Route::post('token-save', [ReservationController::class, 'saveToken']);
 
 Route::group(['middleware' => 'auth:sanctum'], function () {
 
