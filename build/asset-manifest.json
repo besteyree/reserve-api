@@ -1,0 +1,40 @@
+{
+  "files": {
+    "main.css": "/static/css/main.6e10fac8.chunk.css",
+    "main.js": "/static/js/main.e4f0d503.chunk.js",
+    "main.js.map": "/static/js/main.e4f0d503.chunk.js.map",
+    "runtime-main.js": "/static/js/runtime-main.81eb82a4.js",
+    "runtime-main.js.map": "/static/js/runtime-main.81eb82a4.js.map",
+    "static/css/2.4c5205df.chunk.css": "/static/css/2.4c5205df.chunk.css",
+    "static/js/2.623f4756.chunk.js": "/static/js/2.623f4756.chunk.js",
+    "static/js/2.623f4756.chunk.js.map": "/static/js/2.623f4756.chunk.js.map",
+    "index.html": "/index.html",
+    "static/css/2.4c5205df.chunk.css.map": "/static/css/2.4c5205df.chunk.css.map",
+    "static/css/main.6e10fac8.chunk.css.map": "/static/css/main.6e10fac8.chunk.css.map",
+    "static/js/2.623f4756.chunk.js.LICENSE.txt": "/static/js/2.623f4756.chunk.js.LICENSE.txt",
+    "static/media/2-Chair-Green.6a57c09b.svg": "/static/media/2-Chair-Green.6a57c09b.svg",
+    "static/media/2-Chair-red.da5fe6c6.svg": "/static/media/2-Chair-red.da5fe6c6.svg",
+    "static/media/6 Tables - Green.db22cc8a.svg": "/static/media/6 Tables - Green.db22cc8a.svg",
+    "static/media/6 Tables -Red.f03b65b5.svg": "/static/media/6 Tables -Red.f03b65b5.svg",
+    "static/media/busy.svg": "/static/media/busy.c4668539.svg",
+    "static/media/default.svg": "/static/media/default.1f281972.svg",
+    "static/media/disconnected.svg": "/static/media/disconnected.9c7ea75e.svg",
+    "static/media/empty-icon.0e5fd287.svg": "/static/media/empty-icon.0e5fd287.svg",
+    "static/media/empty.svg": "/static/media/empty.f2b844b2.svg",
+    "static/media/free-table.4999b57a.svg": "/static/media/free-table.4999b57a.svg",
+    "static/media/logo.6b9c66c5.png": "/static/media/logo.6b9c66c5.png",
+    "static/media/occupied-table.d33fd289.svg": "/static/media/occupied-table.d33fd289.svg",
+    "static/media/selector-check-mark.11465817.svg": "/static/media/selector-check-mark.11465817.svg",
+    "static/media/slider.css": "/static/media/slider-thumb.3d161c84.svg",
+    "static/media/spin.svg": "/static/media/spin.a71ffb17.svg",
+    "static/media/table.694c0a57.jpg": "/static/media/table.694c0a57.jpg",
+    "static/media/tick.fb67c61e.svg": "/static/media/tick.fb67c61e.svg"
+  },
+  "entrypoints": [
+    "static/js/runtime-main.81eb82a4.js",
+    "static/css/2.4c5205df.chunk.css",
+    "static/js/2.623f4756.chunk.js",
+    "static/css/main.6e10fac8.chunk.css",
+    "static/js/main.e4f0d503.chunk.js"
+  ]
+}

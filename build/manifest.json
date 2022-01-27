@@ -1,0 +1,25 @@
+{
+  "short_name": "Wegsoft",
+  "name": "Wegsoft Reservation",
+  "icons": [
+    {
+      "src": "android/android-launchericon-48-48.png",
+      "sizes": "48x48",
+      "type": "image/png"
+    },
+    {
+      "src": "android/android-launchericon-192-192.png",
+      "type": "image/png",
+      "sizes": "192x192"
+    },
+    {
+      "src": "android/android-launchericon-512-512.png",
+      "type": "image/png",
+      "sizes": "512x512"
+    }
+  ],
+  "start_url": "/restaurant/login",
+  "display": "standalone",
+  "theme_color": "#000000",
+  "background_color": "#ffffff"
+}
