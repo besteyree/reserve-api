@@ -89,7 +89,6 @@ class Restaurant extends Model
         ->map(function($row){
             return $row->count();
         });
-
         return $source;
     }
 

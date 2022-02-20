@@ -4,7 +4,7 @@ use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
-class AddReservedToFilledReservations extends Migration
+class AddMoreMoreToFilledReservations extends Migration
 {
     /**
      * Run the migrations.
@@ -14,7 +14,7 @@ class AddReservedToFilledReservations extends Migration
     public function up()
     {
         Schema::table('filled_reservations', function (Blueprint $table) {
-            $table->integer('reserved_by')->nullable();
+            $table->string('delete_reason')->nullable();
         });
     }
 

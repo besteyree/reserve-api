@@ -30,7 +30,7 @@ Route::get('get-reservation/{email}', [ReservationController::class, 'getReserva
 // open api
 Route::get('table-types/{id?}', [TableTypeController::class, 'index']);
 
-//save token 
+//save token
 Route::post('token-save', [ReservationController::class, 'saveToken']);
 
 Route::group(['middleware' => 'auth:sanctum'], function () {
@@ -50,6 +50,7 @@ Route::group(['middleware' => 'auth:sanctum'], function () {
     Route::get('reservation/{id?}', [ReservationController::class, 'index']);
     Route::post('checkout/{id?}', [TableController::class, 'checkout']);
     Route::get('checkout-one/{id}/{user_id}', [TableController::class, 'checkoutOne']);
-    Route::delete('delete/{id?}', [ReservationController::class, 'destroy']);
+    Route::post('delete/{id?}', [ReservationController::class, 'destroy']);
+    Route::get('restore/{id}', [ReservationController::class, 'restore']);
 
 });

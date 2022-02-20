@@ -15,6 +15,7 @@ class AddSourceToFilledReservations extends Migration
     {
         Schema::table('filled_reservations', function (Blueprint $table) {
             $table->string('source')->nullable();
+            $table->integer('reserved_by')->nullable();
         });
     }
 
