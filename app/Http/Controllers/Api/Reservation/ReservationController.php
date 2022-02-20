@@ -28,13 +28,40 @@ class ReservationController extends Controller
             $restaurant->where('restaurant_id', $id);
             $search = \Request('filter');
 
+            if(\Request('page') == 'todayTomorrow'){
+
+                $restaurant
+                ->select('date', \DB::raw('count(*) as total'))
+                ->whereDate('date', '>=', Carbon::today())
+                ->where('status', '!=', 5)
+                ->where('status', '!=', 4);
+                return $restaurant->groupBy('date')->get();
+
+            }
+
+            if(\Request('page') == 'history'){
+
+                $restaurant
+                ->select('date', \DB::raw('count(*) as total'))
+                ->whereIn('status',[4, 5]);
+                return $restaurant
+                ->groupBy('date')
+                ->get();
+
+            }
+
             if(\Request('day') == 'history'){
                 if( \Request('filter'))
                     $restaurant->where('name','LIKE' ,"%$search%");
 
-                $restaurant->where('status', 4);
+                $restaurant
+                ->withTrashed()
+                ->where(function($row) {
+                    $row->whereIn('status', [4, 5]);
+                    $row->orWhere('deleted_at', '!=', null);
+                });
                 $restaurant->orderBy('seated_date', 'DESC');
-                return $restaurant->paginate(6);
+                return $restaurant->paginate(100000);
             }
 
             if(in_array(\Request('status'), ['0', '2', '3'])){
@@ -43,7 +70,6 @@ class ReservationController extends Controller
 
                 $restaurant->where('status', \Request('status'));
             }
-
 
             if(\Request('day') == 'waitlisted'){
                 if( \Request('filter'))
@@ -61,37 +87,17 @@ class ReservationController extends Controller
 
                 }
 
-                $restaurant->where('status', 1);
+                $restaurant
+                ->where('status', 1)
+                ->orderBy('created_at', 'DESC');
                 return  $restaurant->paginate(6);
-            }
-
-            $restaurant->where('status', '!=', 1);
-
-            if(\Request('day') == 'today'){
-                if( \Request('filter'))
-                    $restaurant->where('name','LIKE' ,"%$search%");
-
-                $restaurant->whereDate('date', Carbon::today());
-
-                if(!in_array(\Request('status'), ['0', '2', '3']))
-                    $restaurant->whereIn('status', ['0', '2', '3']);
-
-            }
-
-            if(\Request('day') == 'tomorrow'){
-                if( \Request('filter'))
-                    $restaurant->where('name','LIKE' ,"%$search%");
-
-                $restaurant->whereDate('date', Carbon::tomorrow())
-                ->where('status', '!=', 5)
-                ->where('status', '!=', 4);
             }
 
             if(!in_array(\Request('day'), ['today', 'tomorrow'])){
 
                 if(\Request('status') == 'is_day')
                 {
-                    if( \Request('filter'))
+                    if(\Request('filter'))
                         $restaurant->where('name','LIKE' ,"%$search%");
 
                     $restaurant->where('status', '!=', 5);
@@ -107,7 +113,7 @@ class ReservationController extends Controller
                     if( \Request('filter'))
                         $restaurant->where('name','LIKE' ,"%$search%");
 
-                    $restaurant->where('status', 4)
+                    $restaurant->whereIn('status', [4, 5])
                     ->whereDay('date', date('d', strtotime(\Request('day'))))
                     ->whereMonth('date', date('m', strtotime(\Request('day'))))
                     ->whereYear('date', date('Y', strtotime(\Request('day'))));
@@ -133,6 +139,28 @@ class ReservationController extends Controller
                 ->whereYear('date', date('Y', strtotime(\Request('day'))));
                 return $restaurant->get();
             }
+
+            if(\Request('day') == 'today'){
+                if( \Request('filter'))
+                    $restaurant->where('name','LIKE' ,"%$search%");
+
+                $restaurant->whereDate('date', Carbon::now());
+
+                if(!in_array(\Request('status'), ['0', '2', '3']))
+                    $restaurant->whereIn('status', ['0', '2', '3']);
+
+            }
+
+            if(\Request('day') == 'tomorrow'){
+                if( \Request('filter'))
+                    $restaurant->where('name','LIKE' ,"%$search%");
+
+                $restaurant->whereDate('date', Carbon::tomorrow())
+                ->where('status', '!=', 5)
+                ->where('status', '!=', 4);
+            }
+
+            // $restaurant->where('status', '!=', 1);
 
             return $restaurant->paginate(6);
         }
@@ -170,10 +198,10 @@ class ReservationController extends Controller
 
             $input = $request->validated();
             $input['restaurant_id'] = auth()->check() ? auth()->user()->restaurant_id : 1;
-            $restaurant = FilledReservation::create($input);
+
+            $reservation = FilledReservation::create($input);
 
             $message = 'Got New Reservation from '.$input['name'];
-
             foreach(DeviceToken::get() as $data){
 
                 $get = $data->token;
@@ -208,15 +236,54 @@ class ReservationController extends Controller
                 }
             }
 
-            return \Response::success($restaurant, "Thank You! Reservation sent for Confirmation.");
+            if(isset($request->table) && count($request->table) > 0){
+                foreach($request->table as $table) {
+                    Table::find($table)
+                    ->update([
+                        'status' => $request->status,
+                        'user_id' => $reservation->id,
+                    ]);
+                }
+
+                $user = FilledReservation::find($reservation->id);
+
+                if($user->status === 0){
+                    dispatch(new SendConfirmEmail($user));
+                }
+
+                $status = 1;
+
+                if($request->is_walkin == 1)
+                {
+                    if($request->type == 1)
+                    {
+                        $status = 4;
+                        $user->update([
+                            'seated_date' => now(),
+                        ]);
+                    }
+                }else {
+                    $status = $request->status;
+                }
+
+                $user->update([
+                    'status' => $status,
+                ]);
+            }
+
+            return \Response::success($reservation, "Thank You! Reservation sent for Confirmation.");
 
         }catch(Exception $e) {
             return \Response::failed($e, 'Reservation Updated failed');
         }
     }
 
-    public function destroy($id)
+    public function destroy($id, Request $request)
     {
+        $reserve = FilledReservation::find($id);
+        $reserve->update([
+            'delete_reason' => $request->reason
+        ]);
         FilledReservation::destroy($id);
         return \Response::success(null, "Reservation Successfully deleted!");
     }
@@ -237,5 +304,12 @@ class ReservationController extends Controller
         }
 
         return 'success';
+    }
+
+    public function restore($id)
+    {
+        FilledReservation::withTrashed()
+        ->find($id)->restore();
+        return 'Successfully Restored!';
     }
 }

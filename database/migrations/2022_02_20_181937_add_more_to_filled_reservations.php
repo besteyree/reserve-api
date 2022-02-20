@@ -4,7 +4,7 @@ use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
-class AddBelongsToUser extends Migration
+class AddMoreToFilledReservations extends Migration
 {
     /**
      * Run the migrations.
@@ -13,8 +13,9 @@ class AddBelongsToUser extends Migration
      */
     public function up()
     {
-        Schema::table('users', function (Blueprint $table) {
-            $table->integer('belongs_to_restaurant')->nullable()->comment('null is admin else employee');
+        Schema::table('filled_reservations', function (Blueprint $table) {
+            $table->date('birthdate')->nullable();
+            $table->date('anniversary')->nullable();
         });
     }
 
@@ -25,7 +26,7 @@ class AddBelongsToUser extends Migration
      */
     public function down()
     {
-        Schema::table('users', function (Blueprint $table) {
+        Schema::table('filled_reservations', function (Blueprint $table) {
             //
         });
     }
