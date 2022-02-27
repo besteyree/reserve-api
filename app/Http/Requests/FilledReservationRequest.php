@@ -28,6 +28,7 @@ class FilledReservationRequest extends FormRequest
             'phone' => 'required|numeric',
             'email' => 'nullable|email',
             'date' => 'required|date',
+            'type' => 'nullable',
             'time' => 'required',
             'adults' => 'nullable',
             'kids' => 'nullable',
