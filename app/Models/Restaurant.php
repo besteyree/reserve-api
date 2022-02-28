@@ -233,20 +233,38 @@ class Restaurant extends Model
 
     public function getReservationCountAttribute()
     {
-        $reservation = FilledReservation::get();
 
-        $restaurants['one'] =  $reservation->where('status', 1)->count();
-        $restaurants['two'] =  $reservation->where('status', 1)
+        $restaurants['one'] = FilledReservation::where(function($row) {
+            $row->where('status', 1);
+            $row->orWhere('type', 2);
+        })
+        ->count();
+
+        $restaurants['two'] =  FilledReservation::where(function($row) {
+                $row->where('status', 1);
+                $row->orWhere('type', 2);
+            })
             ->where('no_of_occupancy', '>', '0')
             ->where('no_of_occupancy', '<', '4')->count();
-        $restaurants['three'] =  $reservation->where('status', 1)
+        $restaurants['three'] = FilledReservation::where(function($row) {
+                $row->where('status', 1);
+                $row->orWhere('type', 2);
+            })
             ->where('no_of_occupancy', '>', '3')
             ->where('no_of_occupancy', '<', '6')->count();
-        $restaurants['four'] = $reservation->where('status', 1)
+
+        $restaurants['four'] = FilledReservation::where(function($row) {
+                $row->where('status', 1);
+                $row->orWhere('type', 2);
+            })
             ->where('no_of_occupancy', '>', '5')
             ->where('no_of_occupancy', '<', '9')
             ->count();
-        $restaurants['five'] =  $reservation->where('status', 1)
+
+        $restaurants['five'] =  FilledReservation::where(function($row) {
+                $row->where('status', 1);
+                $row->orWhere('type', 2);
+            })
             ->where('no_of_occupancy', '>', '8')
             ->count();
 

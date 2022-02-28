@@ -24,27 +24,28 @@ class ReservationController extends Controller
     public function index($id=null)
     {
         if($id){
-            $restaurant = FilledReservation::query();
-            $restaurant->where('restaurant_id', $id);
+            $reservation = FilledReservation::query();
+            $reservation->where('restaurant_id', $id);
             $search = \Request('filter');
 
             if(\Request('page') == 'todayTomorrow'){
 
-                $restaurant
+                $reservation
                 ->select('date', \DB::raw('count(*) as total'))
                 ->whereDate('date', '>=', Carbon::today())
                 ->where('status', '!=', 5)
                 ->where('status', '!=', 4);
-                return $restaurant->groupBy('date')->get();
+                return $reservation->groupBy('date')->get();
 
             }
 
             if(\Request('page') == 'history'){
 
-                $restaurant
+                $reservation
                 ->select('date', \DB::raw('count(*) as total'))
                 ->whereIn('status',[4, 5]);
-                return $restaurant
+
+                return $reservation
                 ->groupBy('date')
                 ->get();
 
@@ -52,117 +53,134 @@ class ReservationController extends Controller
 
             if(\Request('day') == 'history'){
                 if( \Request('filter'))
-                    $restaurant->where('name','LIKE' ,"%$search%");
+                    $reservation->where('name','LIKE' ,"%$search%");
 
-                $restaurant
+                $reservation
                 ->withTrashed()
                 ->where(function($row) {
                     $row->whereIn('status', [4, 5]);
+                    $row->where('type', 1);
                     $row->orWhere('deleted_at', '!=', null);
                 });
-                $restaurant->orderBy('seated_date', 'DESC');
-                return $restaurant->paginate(100000);
+                $reservation->orderBy('seated_date', 'DESC');
+                return $reservation->paginate(100000);
             }
 
             if(in_array(\Request('status'), ['0', '2', '3'])){
                 if( \Request('filter'))
-                    $restaurant->where('name','LIKE' ,"%$search%");
+                    $reservation->where('name','LIKE' ,"%$search%");
 
-                $restaurant->where('status', \Request('status'));
+                $reservation->where('status', \Request('status'));
             }
 
             if(\Request('day') == 'waitlisted'){
+
                 if( \Request('filter'))
-                    $restaurant->where('name', 'LIKE' ,"%$search%");
+                    $reservation->where('name', 'LIKE' ,"%$search%");
 
                 if(\Request('wait_to')){
                     if(\Request('wait_from') == '8'){
-                        $restaurant->where('no_of_occupancy', '>', 8)
-                        ->where('status', 1);
+                        $reservation->where('no_of_occupancy', '>', 8)
+                        ->where(function($row) {
+                            $row->where('status', 1);
+                            $row->orWhere('type', 2);
+                        });
                     }else{
-                        $restaurant->where('no_of_occupancy', '>', \Request('wait_from'))
+                        $reservation->where('no_of_occupancy', '>', \Request('wait_from'))
                         ->where('no_of_occupancy', '<', \Request('wait_to'))
-                        ->where('status', 1);
+                        ->where(function($row) {
+                            $row->where('status', 1);
+                            $row->orWhere('type', 2);
+                        });
                     }
 
                 }
 
-                $restaurant
-                ->where('status', 1)
+                $reservation
+                ->where(function($row) {
+                    $row->where('status', 1);
+                    $row->orWhere('type', 2);
+                })
                 ->orderBy('created_at', 'DESC');
-                return  $restaurant->paginate(6);
+                return  $reservation->paginate(6);
             }
 
             if(!in_array(\Request('day'), ['today', 'tomorrow'])){
-
                 if(\Request('status') == 'is_day')
                 {
                     if(\Request('filter'))
-                        $restaurant->where('name','LIKE' ,"%$search%");
+                        $reservation->where('name','LIKE' ,"%$search%");
 
-                    $restaurant->where('status', '!=', 5);
-                    $restaurant->whereDay('date', date('d', strtotime(\Request('day'))))
+                    $reservation->where('status', '!=', 5);
+
+                    $reservation->whereDay('date', date('d', strtotime(\Request('day'))))
                     ->whereMonth('date', date('m', strtotime(\Request('day'))))
                     ->whereYear('date', date('Y', strtotime(\Request('day'))));
 
-                    return $restaurant->get();
+                    return $reservation->get();
                 }
 
                 if(\Request('status') == 'is_history')
                 {
                     if( \Request('filter'))
-                        $restaurant->where('name','LIKE' ,"%$search%");
+                        $reservation->where('name','LIKE' ,"%$search%");
 
-                    $restaurant->whereIn('status', [4, 5])
+                    $reservation->whereIn('status', [4, 5])
                     ->whereDay('date', date('d', strtotime(\Request('day'))))
                     ->whereMonth('date', date('m', strtotime(\Request('day'))))
                     ->whereYear('date', date('Y', strtotime(\Request('day'))));
 
-                    $restaurant->orderBy('seated_date', 'DESC');
-                    return $restaurant->get();
+                    $reservation->orderBy('seated_date', 'DESC');
+                    return $reservation->get();
                 }
 
                 if(\Request('status') == 'is_history_cal')
                 {
-                    $restaurant->where('status', 4)
+                    $reservation->where('status', 4)
                     ->whereMonth('date', date('m', strtotime(\Request('day'))) + 1)
                     ->whereYear('date', date('Y', strtotime(\Request('day'))));
 
-                    return $restaurant->get();
+                    return $reservation->get();
                 }
 
-                $restaurant
+                $reservation
                 ->select('id', 'date', 'time', 'name', 'status')
                 ->where('status', '!=', 5)
                 ->where('status', '!=', 4)
                 ->whereMonth('date', date('m', strtotime(\Request('day'))) + 1)
                 ->whereYear('date', date('Y', strtotime(\Request('day'))));
-                return $restaurant->get();
+                return $reservation->get();
             }
+
 
             if(\Request('day') == 'today'){
                 if( \Request('filter'))
-                    $restaurant->where('name','LIKE' ,"%$search%");
+                    $reservation->where('name','LIKE' ,"%$search%");
 
-                $restaurant->whereDate('date', Carbon::now());
+                $reservation->whereDate('date', Carbon::now());
+                $reservation->where('type', null);
+
 
                 if(!in_array(\Request('status'), ['0', '2', '3']))
-                    $restaurant->whereIn('status', ['0', '2', '3']);
+                    $reservation->whereIn('status', ['0', '2', '3']);
 
             }
 
             if(\Request('day') == 'tomorrow'){
                 if( \Request('filter'))
-                    $restaurant->where('name','LIKE' ,"%$search%");
+                    $reservation->where('name','LIKE' ,"%$search%");
 
-                $restaurant->whereDate('date', Carbon::tomorrow())
+                $reservation->where('type', null);
+
+
+                $reservation->whereDate('date', Carbon::tomorrow())
                 ->where('status', '!=', 5)
                 ->where('status', '!=', 4);
             }
 
-            // $restaurant->where('status', '!=', 1);
+            // $reservation->where('status', '!=', 1);
 
-            return $restaurant->paginate(6);
+            return $reservation->paginate(6);
         }
 
         if(auth()->user()->user_type == 1)
@@ -194,14 +212,14 @@ class ReservationController extends Controller
             }
         }
 
-        // try{
+        try{
 
             $input = $request->validated();
             $input['restaurant_id'] = auth()->check() ? auth()->user()->restaurant_id : 1;
 
             $reservation = FilledReservation::create($input);
 
-            if(isset($request->table) && count($request->table) > 0){
+            if(isset($request->table) && count($request->table ?? 0) > 0){
                 foreach($request->table as $table) {
                     Table::find($table)
                     ->update([
@@ -211,10 +229,6 @@ class ReservationController extends Controller
                 }
 
                 $user = FilledReservation::find($reservation->id);
-
-                if($user->status === 0){
-                    dispatch(new SendConfirmEmail($user));
-                }
 
                 $status = 1;
 
@@ -264,20 +278,14 @@ class ReservationController extends Controller
                     $err = curl_error($curl);
 
                     curl_close($curl);
-
-                    if ($err) {
-                    echo "cURL Error #:" . $err;
-                    } else {
-                    echo $response;
-                    }
                 }
             }
 
             return \Response::success($reservation, "Thank You! Reservation sent for Confirmation.");
 
-        // }catch(Exception $e) {
-        //     return \Response::failed($e, 'Reservation Updated failed');
-        // }
+        }catch(Exception $e) {
+            return \Response::failed($e, 'Reservation Updated failed');
+        }
     }
 
     public function destroy($id, Request $request)
@@ -286,8 +294,17 @@ class ReservationController extends Controller
         $reserve->update([
             'delete_reason' => $request->reason
         ]);
+
         FilledReservation::destroy($id);
-        return \Response::success(null, "Reservation Successfully deleted!");
+
+        $reservation = FilledReservation::where(function($row) {
+            $row->where('status', 1);
+            $row->orWhere('type', 2);
+        })
+        ->orderBy('created_at', 'DESC')
+        ->paginate(6);
+
+        return \Response::success(['reservation' => $reservation, 'count' => Restaurant::with('floor:id,title,restaurant_id', 'floor.table:id,title,no_of_occupany,floor_id,type_id,status,user_id', 'floor.table.tableType:id,title', 'floor.table.user')->find(1)], "Reservation Successfully deleted!");
     }
 
     public function getUserFmPhone(Request $request)

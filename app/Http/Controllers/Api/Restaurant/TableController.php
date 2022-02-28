@@ -78,8 +78,9 @@ class TableController extends Controller
             }
 
             $user->update([
-                'status' => 2,
-                'confirmed_date' => now()
+                'status' => 4,
+                'confirmed_date' => now(),
+                'seated_date' => now()
             ]);
 
             return \Response::success(Restaurant::with('floor:id,title,restaurant_id', 'floor.table:id,title,no_of_occupany,floor_id,type_id,status,user_id', 'floor.table.tableType:id,title', 'floor.table.user')->find(1), 'Table Reserved Successfully');
