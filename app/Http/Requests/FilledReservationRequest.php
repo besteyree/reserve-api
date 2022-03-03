@@ -37,7 +37,8 @@ class FilledReservationRequest extends FormRequest
             'status' => 'nullable',
             'is_walkin' => 'nullable',
             'source' => 'nullable',
-            'reserved_by' => 'nullable'
+            'reserved_by' => 'nullable',
+            'comment' => 'nullable'
         ];
     }
 }
