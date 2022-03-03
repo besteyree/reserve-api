@@ -314,7 +314,7 @@ class ReservationController extends Controller
         ->orderBy('created_at', 'DESC')
         ->paginate(10000);
 
-        return  $reservation;
+        return $reservation;
     }
 
     public function all()
@@ -323,7 +323,7 @@ class ReservationController extends Controller
         $reservation->where('restaurant_id', 1);
         $search = \Request('filter');
 
-        if($search)
+        if(!empty($search))
             $reservation->where('name','LIKE' ,"%$search%");
 
         $reservation->where('is_walkin', null)
@@ -339,14 +339,14 @@ class ReservationController extends Controller
         $reservation->where('restaurant_id', 1);
         $search = \Request('filter');
 
-        if($search)
+        if(!empty($search))
             $reservation->where('name','LIKE' ,"%$search%");
 
         $reservation
         ->withTrashed()
         ->where('deleted_at', '!=', null)
         ->orderBy('deleted_at', 'DESC')
-        ->paginated(10000);
+        ->paginate(10000);
 
         return $reservation;
     }
@@ -357,13 +357,13 @@ class ReservationController extends Controller
         $reservation->where('restaurant_id', 1);
         $search = \Request('filter');
 
-        if($search)
+        if(!empty($search))
             $reservation->where('name','LIKE' ,"%$search%");
 
         $reservation
         ->where('status', 5)
         ->orderBy('created_at', 'DESC')
-        ->paginated(10000);
+        ->paginate(10000);
 
         return $reservation;
     }
