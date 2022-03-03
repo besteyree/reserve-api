@@ -61,7 +61,7 @@ class ReservationController extends Controller
                     $row->whereIn('status', ['0', '1', '2', '3', '4', '5']);
                     $row->orWhere('deleted_at', '!=', null);
                 });
-                $reservation->orderBy('seated_date', 'DESC');
+                $reservation->orderBy('created_at', 'DESC');
                 return $reservation->paginate(100000);
             }
 
