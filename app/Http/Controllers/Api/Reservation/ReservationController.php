@@ -58,8 +58,13 @@ class ReservationController extends Controller
                 $reservation
                 ->withTrashed()
                 ->where(function($row) {
+<<<<<<< HEAD
                     $row->whereIn('status', [4, 5]);
                     $row->where('type', 1);
+=======
+                    $row->whereIn('status', [0, 1, 2, 3, 4, 5]);
+                    $row->whereIn('type', [1, null]);
+>>>>>>> 779d0b1d26bb4e578cf35944b323d596b3bcfc41
                     $row->orWhere('deleted_at', '!=', null);
                 });
                 $reservation->orderBy('seated_date', 'DESC');
@@ -250,6 +255,7 @@ class ReservationController extends Controller
                 ]);
             }
 
+<<<<<<< HEAD
             $message = 'Got New Reservation from '.$input['name'];
 
             if(DeviceToken::get()->count() > 0){
@@ -281,6 +287,8 @@ class ReservationController extends Controller
                 }
             }
 
+=======
+>>>>>>> 779d0b1d26bb4e578cf35944b323d596b3bcfc41
             return \Response::success($reservation, "Thank You! Reservation sent for Confirmation.");
 
         }catch(Exception $e) {
