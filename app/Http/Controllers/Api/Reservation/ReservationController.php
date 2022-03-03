@@ -306,13 +306,13 @@ class ReservationController extends Controller
         $reservation->where('restaurant_id', 1);
         $search = \Request('filter');
 
-        if(!empty($search))
-            $reservation->where('name','LIKE' ,"%$search%");
+        // if(!empty($search))
+        //     $reservation->where('name','LIKE' ,"%$search%");
 
-        $reservation->where('type', 1)
-        ->where('is_walkin', 1)
-        ->orderBy('created_at', 'DESC')
-        ->paginate(10000);
+        // $reservation->where('type', '1')
+        // ->where('is_walkin', '1')
+        // ->orderBy('created_at', 'DESC')
+        // ->paginate(10000);
 
         return $reservation;
     }
