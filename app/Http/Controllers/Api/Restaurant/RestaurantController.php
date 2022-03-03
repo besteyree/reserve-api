@@ -58,4 +58,22 @@ class RestaurantController extends Controller
         }
 
     }
+
+    public function analytic()
+    {
+        $date = \Request('date');
+
+        $reservation = FilledReservation::where('is_walkin', '=', null)
+        ->whereDate('created_at', $date)
+        ->count();
+
+        $walkin = FilledReservation::where('is_walkin', '=', 1)
+        ->whereDate('created_at', $date)
+        ->count();
+
+        return [
+            'reservation' => $reservation,
+            'walkin' => $walkin
+        ];
+    }
 }
