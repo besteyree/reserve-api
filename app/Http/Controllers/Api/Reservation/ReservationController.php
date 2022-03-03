@@ -313,7 +313,7 @@ class ReservationController extends Controller
         ->where('is_walkin', '1')
         ->orderBy('created_at', 'DESC');
 
-        return $reservation->paginate(10000);
+        return $reservation->paginate(10);
     }
 
     public function all()
@@ -329,7 +329,7 @@ class ReservationController extends Controller
         ->orderBy('created_at', 'DESC');
 
         return $reservation
-        ->paginate(10000);
+        ->paginate(10);
     }
 
     public function deleted()
@@ -347,7 +347,7 @@ class ReservationController extends Controller
         ->orderBy('deleted_at', 'DESC');
 
         return $reservation
-        ->paginate(10000);
+        ->paginate(10);
     }
 
     public function left()
@@ -364,6 +364,6 @@ class ReservationController extends Controller
         ->orderBy('created_at', 'DESC');
 
         return $reservation
-        ->paginate(10000);
+        ->paginate(10);
     }
 }
