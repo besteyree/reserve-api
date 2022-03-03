@@ -250,37 +250,6 @@ class ReservationController extends Controller
                 ]);
             }
 
-            $message = 'Got New Reservation from '.$input['name'];
-
-            if(DeviceToken::get()->count() > 0){
-                foreach(DeviceToken::get() as $data){
-                    $get = $data->token;
-                    $curl = curl_init();
-
-                    curl_setopt_array($curl, array(
-                    CURLOPT_URL => "https://fcm.googleapis.com/fcm/send",
-                    CURLOPT_RETURNTRANSFER => true,
-                    CURLOPT_ENCODING => "",
-                    CURLOPT_MAXREDIRS => 10,
-                    CURLOPT_TIMEOUT => 30,
-                    CURLOPT_HTTP_VERSION => CURL_HTTP_VERSION_1_1,
-                    CURLOPT_CUSTOMREQUEST => "POST",
-                    CURLOPT_POSTFIELDS => "{\n    \"notification\": {\n        \"title\": \"New Reservation\",\n        \"body\": \"$message\",\n        \"click_action\": \"https://reserve.whitealba.in/restaurant/dashboard?tab=1\",\n        \"icon\": \"https://i.imgur.com/WXQJdb1.png\"\n    },\n    \"to\": \"$get\"\n}",
-                    CURLOPT_HTTPHEADER => array(
-                        "authorization: key=AAAAuJEaeRY:APA91bEpgUMWlt1Z_8n_JG5cfIOrkpuXKYmFDMDHSHeCXgNFwWA_Y-hxU8MmwRGNZB5ltaujEE_8k_KtrdhHXBYg7bO02--zCKciUgk1GmTdFJDG133RT_PiE5v0vuPXKH1dTVk789Jw",
-                        "cache-control: no-cache",
-                        "content-type: application/json",
-                        "postman-token: 3765bcea-b36e-1dd1-6d4a-4d3bcfe2e4e4"
-                    ),
-                    ));
-
-                    $response = curl_exec($curl);
-                    $err = curl_error($curl);
-
-                    curl_close($curl);
-                }
-            }
-
             return \Response::success($reservation, "Thank You! Reservation sent for Confirmation.");
 
         }catch(Exception $e) {
