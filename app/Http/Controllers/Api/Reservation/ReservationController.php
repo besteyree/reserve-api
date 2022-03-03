@@ -58,8 +58,8 @@ class ReservationController extends Controller
                 $reservation
                 ->withTrashed()
                 ->where(function($row) {
-                    $row->whereIn('status', [4, 5]);
-                    $row->where('type', 1);
+                    $row->whereIn('status', [0, 1, 2, 3, 4, 5]);
+                    $row->whereIn('type', [1, null]);
                     $row->orWhere('deleted_at', '!=', null);
                 });
                 $reservation->orderBy('seated_date', 'DESC');
