@@ -156,7 +156,7 @@ class ReservationController extends Controller
                 if( \Request('filter'))
                     $reservation->where('name','LIKE' ,"%$search%");
 
-                $reservation->whereDate('date', Carbon::today());
+                $reservation->whereDate('date', date('Y-m-d'));
                 $reservation->where('type', null);
 
                 if(!in_array(\Request('status'), ['0', '2', '3']))
