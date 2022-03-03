@@ -62,7 +62,7 @@ class ReservationController extends Controller
                     $row->orWhere('deleted_at', '!=', null);
                 });
                 $reservation->orderBy('created_at', 'DESC');
-                return $reservation->paginate(100000);
+                return $reservation->paginate(10);
             }
 
             if(in_array(\Request('status'), ['0', '2', '3'])){
@@ -326,10 +326,10 @@ class ReservationController extends Controller
             $reservation->where('name','LIKE' ,"%$search%");
 
         $reservation->where('is_walkin', null)
-        ->orderBy('created_at', 'DESC')
-        ->paginate(10000);
+        ->orderBy('created_at', 'DESC');
 
-        return $reservation;
+        return $reservation
+        ->paginate(10000);
     }
 
     public function deleted()
@@ -344,10 +344,10 @@ class ReservationController extends Controller
         $reservation
         ->withTrashed()
         ->where('deleted_at', '!=', null)
-        ->orderBy('deleted_at', 'DESC')
-        ->paginate(10000);
+        ->orderBy('deleted_at', 'DESC');
 
-        return $reservation;
+        return $reservation
+        ->paginate(10000);
     }
 
     public function left()
@@ -361,9 +361,9 @@ class ReservationController extends Controller
 
         $reservation
         ->where('status', 5)
-        ->orderBy('created_at', 'DESC')
-        ->paginate(10000);
+        ->orderBy('created_at', 'DESC');
 
-        return $reservation;
+        return $reservation
+        ->paginate(10000);
     }
 }
