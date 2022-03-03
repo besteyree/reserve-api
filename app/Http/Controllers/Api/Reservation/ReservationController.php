@@ -314,7 +314,7 @@ class ReservationController extends Controller
         // ->orderBy('created_at', 'DESC')
         // ->paginate(10000);
 
-        return $reservation;
+        return $reservation->paginate(10);
     }
 
     public function all()
