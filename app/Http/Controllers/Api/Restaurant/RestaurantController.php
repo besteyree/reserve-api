@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Api\Restaurant;
 
 use App\Http\Controllers\Controller;
 use App\Http\Requests\RestaurantRequest;
+use App\Models\FilledReservation;
 use App\Models\Restaurant;
 use Illuminate\Http\Request;
 
