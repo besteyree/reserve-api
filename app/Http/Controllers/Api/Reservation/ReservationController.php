@@ -299,4 +299,68 @@ class ReservationController extends Controller
         ->find($id)->restore();
         return 'Successfully Restored!';
     }
+
+    public function walkin()
+    {
+        $reservation = FilledReservation::query();
+        $reservation->where('restaurant_id', 1);
+        $search = \Request('filter');
+
+        if($search)
+            $reservation->where('name','LIKE' ,"%$search%");
+
+        $reservation->where('type', 1)
+        ->where('is_walkin', 1)
+        ->paginate(10000);
+
+        return $reservation;
+    }
+
+    public function all()
+    {
+        $reservation = FilledReservation::query();
+        $reservation->where('restaurant_id', 1);
+        $search = \Request('filter');
+
+        if($search)
+            $reservation->where('name','LIKE' ,"%$search%");
+
+        $reservation->where('is_walkin', null)
+        ->paginate(10000);
+
+        return $reservation;
+    }
+
+    public function deleted()
+    {
+        $reservation = FilledReservation::query();
+        $reservation->where('restaurant_id', 1);
+        $search = \Request('filter');
+
+        if($search)
+            $reservation->where('name','LIKE' ,"%$search%");
+
+        $reservation
+        ->withTrashed()
+        ->where('deleted_at', '!=', null)
+        ->paginated(10000);
+
+        return $reservation;
+    }
+
+    public function left()
+    {
+        $reservation = FilledReservation::query();
+        $reservation->where('restaurant_id', 1);
+        $search = \Request('filter');
+
+        if($search)
+            $reservation->where('name','LIKE' ,"%$search%");
+
+        $reservation
+        ->where('status', 5)
+        ->paginated(10000);
+
+        return $reservation;
+    }
 }

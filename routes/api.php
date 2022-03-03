@@ -52,5 +52,9 @@ Route::group(['middleware' => 'auth:sanctum'], function () {
     Route::get('checkout-one/{id}/{user_id}', [TableController::class, 'checkoutOne']);
     Route::post('delete/{id?}', [ReservationController::class, 'destroy']);
     Route::get('restore/{id}', [ReservationController::class, 'restore']);
+    Route::get('reservation/walkin', [ReservationController::class, 'walkin']);
+    Route::get('reservation/all', [ReservationController::class, 'all']);
+    Route::get('reservation/deleted', [ReservationController::class, 'deleted']);
+    Route::get('reservation/left', [ReservationController::class, 'left']);
 
 });
