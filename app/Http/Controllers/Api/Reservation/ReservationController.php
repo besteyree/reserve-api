@@ -311,10 +311,9 @@ class ReservationController extends Controller
 
         $reservation->where('type', '1')
         ->where('is_walkin', '1')
-        ->orderBy('created_at', 'DESC')
-        ->paginate(10000);
+        ->orderBy('created_at', 'DESC');
 
-        return $reservation;
+        return $reservation->paginate(10000);
     }
 
     public function all()
