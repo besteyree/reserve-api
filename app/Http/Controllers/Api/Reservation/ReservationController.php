@@ -153,6 +153,7 @@ class ReservationController extends Controller
 
 
             if(\Request('day') == 'today'){
+
                 if( \Request('filter'))
                     $reservation->where('name','LIKE' ,"%$search%");
 
@@ -162,6 +163,8 @@ class ReservationController extends Controller
                 if(!in_array(\Request('status'), ['0', '2', '3']))
                     $reservation->whereIn('status', ['0', '2', '3']);
 
+                    return date('Y-m-d');
+                return $reservation->paginate(6);
             }
 
             if(\Request('day') == 'tomorrow'){
