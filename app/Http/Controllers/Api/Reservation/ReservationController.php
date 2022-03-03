@@ -302,6 +302,7 @@ class ReservationController extends Controller
 
     public function walkin()
     {
+        return 'dsds';
         $reservation = FilledReservation::query();
         $reservation->where('restaurant_id', 1);
         $search = \Request('filter');
