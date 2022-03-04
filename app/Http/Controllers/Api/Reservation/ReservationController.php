@@ -33,9 +33,9 @@ class ReservationController extends Controller
                 $reservation
                 ->select('date', \DB::raw('count(*) as total'))
                 ->whereDate('date', '>=', Carbon::today())
-                ->where('status', '!=', 5)
-                ->where('status', '!=', 4);
-                return $reservation->groupBy('date')->get();
+                ->whereIn('status', ['0', '2']);
+                return $reservation->groupBy('date')
+                ->get();
 
             }
 
@@ -110,7 +110,7 @@ class ReservationController extends Controller
                     if(\Request('filter'))
                         $reservation->where('name','LIKE' ,"%$search%");
 
-                    $reservation->where('status', '!=', 5);
+                    $reservation->whereIn('status', ['0', '2']);
 
                     $reservation->whereDay('date', date('d', strtotime(\Request('day'))))
                     ->whereMonth('date', date('m', strtotime(\Request('day'))))
