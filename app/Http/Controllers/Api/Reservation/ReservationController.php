@@ -163,7 +163,7 @@ class ReservationController extends Controller
                 if(in_array(\Request('status'), ['0', '2']))
                     $reservation->where('status', \Request('status') == 0 ? '0' : \Request('status'));
                 else
-                    $reservation->where('status', ['0', '2']);
+                    $reservation->whereIn('status', ['0', '2']);
 
                 $reservation->orderBy('date', 'DESC');
                 return $reservation->paginate(6);
