@@ -160,8 +160,10 @@ class ReservationController extends Controller
                 $reservation->whereDate('date', Carbon::today());
                 $reservation->where('type', null);
 
-                if(!in_array(\Request('status'), ['0', '2', '3']))
-                    $reservation->whereIn('status', ['0', '2', '3']);
+                if(in_array(\Request('status'), ['0', '2']))
+                    $reservation->where('status', \Request('status') == 0 ? '0' : \Request('status'));
+                else
+                    $reservation->where('status', ['0', '2']);
 
                 $reservation->orderBy('date', 'DESC');
                 return $reservation->paginate(6);
