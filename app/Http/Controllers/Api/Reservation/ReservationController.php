@@ -326,6 +326,10 @@ class ReservationController extends Controller
         else
             $reservation->whereDate('date', Carbon::today());
 
+        if(\Request('from') && !\Request('to')) {
+            $reservation->whereDate('date', \Request('from') );
+        }
+
         return $reservation->paginate(10);
     }
 
@@ -340,6 +344,20 @@ class ReservationController extends Controller
 
         $reservation->where('is_walkin', null)
         ->orderBy('created_at', 'DESC');
+
+        $reservation->whereNotIn('status', ['0', '2']);
+
+        $from = date(\Request('from'));
+        $to = date(\Request('to'));
+
+        if(\Request('from') && \Request('to'))
+            $reservation->whereBetween('date', [$from, $to]);
+        else
+            $reservation->whereDate('date', Carbon::today());
+
+        if(\Request('from') && !\Request('to')) {
+            $reservation->whereDate('date', \Request('from') );
+        }
 
         return $reservation
         ->paginate(10);
