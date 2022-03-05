@@ -29,11 +29,11 @@ class ReservationController extends Controller
             $search = \Request('filter');
 
             if(\Request('page') == 'todayTomorrow'){
-
+                $reservation->where('type', null);
                 $reservation
                 ->select('date', \DB::raw('count(*) as total'))
                 ->whereDate('date', '>=', Carbon::today())
-                ->whereIn('status', ['0', '2']);
+                ->where('status', ['0', '2']);
                 return $reservation->groupBy('date')
                 ->get();
 
@@ -58,7 +58,7 @@ class ReservationController extends Controller
                 $reservation
                 ->withTrashed()
                 ->where(function($row) {
-                    $row->whereIn('status', ['0', '1', '2', '3', '4', '5']);
+                    $row->whereIn('status', ['3', '4', '5']);
                     $row->orWhere('deleted_at', '!=', null);
                 });
                 $reservation->orderBy('created_at', 'DESC');
@@ -310,7 +310,7 @@ class ReservationController extends Controller
         $reservation = FilledReservation::query();
         $reservation->where('restaurant_id', 1);
         $search = \Request('filter');
-
+        $data = collect();
         if(!empty($search))
             $reservation->where('name','LIKE' ,"%$search%");
 
@@ -323,14 +323,18 @@ class ReservationController extends Controller
 
         if(\Request('from') && \Request('to'))
             $reservation->whereBetween('date', [$from, $to]);
-        else
-            $reservation->whereDate('date', Carbon::today());
 
-        if(\Request('from') && !\Request('to')) {
-            $reservation->whereDate('date', \Request('from') );
+        if(!\Request('from') && !\Request('to')){
+            $reservation->whereDate('date', Carbon::today());
         }
 
-        return $reservation->paginate(10);
+        if(\Request('from') && !\Request('to')) {
+            $reservation->whereDate('date', $from);
+        }
+
+        $data['count_pax'] = $reservation->sum('no_of_occupancy');
+        $data['reservation'] = $reservation->paginate(10);
+        return $data;
     }
 
     public function all()
@@ -338,12 +342,12 @@ class ReservationController extends Controller
         $reservation = FilledReservation::query();
         $reservation->where('restaurant_id', 1);
         $search = \Request('filter');
+        $data = collect();
 
         if(!empty($search))
             $reservation->where('name','LIKE' ,"%$search%");
 
-        $reservation->where('is_walkin', null)
-        ->orderBy('created_at', 'DESC');
+        $reservation->where('is_walkin', null);
 
         $reservation->whereNotIn('status', ['0', '2']);
 
@@ -352,15 +356,18 @@ class ReservationController extends Controller
 
         if(\Request('from') && \Request('to'))
             $reservation->whereBetween('date', [$from, $to]);
-        else
+
+        if(!\Request('from') && !\Request('to')){
             $reservation->whereDate('date', Carbon::today());
+        }
 
         if(\Request('from') && !\Request('to')) {
             $reservation->whereDate('date', \Request('from') );
         }
 
-        return $reservation
-        ->paginate(10);
+        $data['count_pax'] = $reservation->sum('no_of_occupancy');
+        $data['reservation'] = $reservation->orderBy('created_at', 'DESC')->paginate(10);
+        return $data;
     }
 
     public function deleted()
@@ -368,17 +375,33 @@ class ReservationController extends Controller
         $reservation = FilledReservation::query();
         $reservation->where('restaurant_id', 1);
         $search = \Request('filter');
+        $data = collect();
 
         if(!empty($search))
             $reservation->where('name','LIKE' ,"%$search%");
 
         $reservation
         ->withTrashed()
-        ->where('deleted_at', '!=', null)
-        ->orderBy('deleted_at', 'DESC');
+        ->where('deleted_at', '!=', null);
 
-        return $reservation
-        ->paginate(10);
+        $from = date(\Request('from'));
+        $to = date(\Request('to'));
+
+        if(\Request('from') && \Request('to'))
+            $reservation->whereBetween('date', [$from, $to]);
+
+        if(!\Request('from') && !\Request('to')){
+            $reservation->whereDate('date', Carbon::today());
+        }
+
+        if(\Request('from') && !\Request('to')) {
+            $reservation->whereDate('date', \Request('from') );
+        }
+
+        $data['count_pax'] = $reservation->sum('no_of_occupancy');
+        $data['reservation'] = $reservation->orderBy('created_at', 'DESC')->paginate(10);
+
+        return $data;
     }
 
     public function left()

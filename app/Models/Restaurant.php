@@ -60,10 +60,10 @@ class Restaurant extends Model
     public function getWalkinAttribute()
     {
         $reservation = FilledReservation::where('is_walkin', '=', null)
-        ->count();
+        ->sum('no_of_occupancy');
 
         $walkin = FilledReservation::where('is_walkin', '=', 1)
-        ->count();
+        ->count('no_of_occupancy');
 
         return [
             'reservation' => $reservation,

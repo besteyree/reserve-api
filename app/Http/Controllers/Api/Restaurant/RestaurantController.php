@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\RestaurantRequest;
 use App\Models\FilledReservation;
 use App\Models\Restaurant;
+use Carbon\Carbon;
 use Illuminate\Http\Request;
 
 class RestaurantController extends Controller
@@ -62,19 +63,43 @@ class RestaurantController extends Controller
 
     public function analytic()
     {
-        $date = \Request('date');
 
-        $reservation = FilledReservation::where('is_walkin', '=', null)
-        ->whereDate('created_at', $date)
-        ->count();
+        $from = date(\Request('from'));
+        $to = date(\Request('to'));
+        $reservation = FilledReservation::query();
 
-        $walkin = FilledReservation::where('is_walkin', '=', 1)
-        ->whereDate('created_at', $date)
-        ->count();
+        if(\Request('from') && \Request('to'))
+            $reservation->whereBetween('date', [$from, $to]);
+
+        if(!\Request('from') && !\Request('to')){
+            $reservation->whereDate('date', Carbon::today());
+        }
+
+        if(\Request('from') && !\Request('to')) {
+            $reservation->whereDate('date', \Request('from') );
+        }
+
+        $reservation->where('is_walkin', '=', null);
+
+
+        $walkin = FilledReservation::query();
+
+        $walkin->where('is_walkin', '=', 1);
+
+        if(\Request('from') && \Request('to'))
+            $walkin->whereBetween('date', [$from, $to]);
+
+        if(!\Request('from') && !\Request('to')){
+            $walkin->whereDate('date', Carbon::today());
+        }
+
+        if(\Request('from') && !\Request('to')) {
+            $walkin->whereDate('date', \Request('from') );
+        }
 
         return [
-            'reservation' => $reservation,
-            'walkin' => $walkin
+            'reservation' => $reservation->sum('no_of_occupancy'),
+            'walkin' => $walkin->sum('no_of_occupancy')
         ];
     }
 }
