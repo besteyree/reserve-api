@@ -36,7 +36,6 @@ class ReservationController extends Controller
                 ->where('status', ['0', '2']);
                 return $reservation->groupBy('date')
                 ->get();
-
             }
 
             if(\Request('page') == 'history'){
@@ -166,7 +165,31 @@ class ReservationController extends Controller
                     $reservation->whereIn('status', ['0', '2']);
 
                 $reservation->orderBy('date', 'DESC');
-                return $reservation->paginate(6);
+
+                $reserv['paxLunch'] = $reservation->get()->map(function($row){
+                    $time = date("H:i", strtotime($row->time));
+                    $startTime = date("H:i", strtotime('11:30 AM'));
+                    $endTime = date("H:i", strtotime('04:29 PM'));
+
+                    if($time >= $startTime && $time <= $endTime){
+                        return $row->no_of_occupancy;
+                    }
+                })->filter();
+
+                $reserv['paxDinner'] = $reservation->get()->map(function($row){
+                    $time = date("H:i", strtotime($row->time));
+                    $startTime = date("H:i", strtotime('04:30 PM'));
+                    $endTime = date("H:i", strtotime('11:59 PM'));
+
+                    if($time >= $startTime && $time <= $endTime){
+                        return $row->no_of_occupancy;
+                    }
+
+                })->filter();
+
+                $reserv['all'] = $reservation->paginate(6);
+
+                return $reserv;
             }
 
             if(\Request('day') == 'tomorrow'){
