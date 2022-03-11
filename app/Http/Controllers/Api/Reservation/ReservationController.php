@@ -174,7 +174,7 @@ class ReservationController extends Controller
                     if($time >= $startTime && $time <= $endTime){
                         return $row->no_of_occupancy;
                     }
-                })->filter();
+                })->filter()->values();
 
                 $reserv['paxDinner'] = $reservation->get()->map(function($row){
                     $time = date("H:i", strtotime($row->time));
@@ -185,7 +185,7 @@ class ReservationController extends Controller
                         return $row->no_of_occupancy;
                     }
 
-                })->filter();
+                })->filter()->values();
 
                 $reserv['all'] = $reservation->paginate(6);
 
