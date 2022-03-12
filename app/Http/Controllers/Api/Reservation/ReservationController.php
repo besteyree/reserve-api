@@ -25,6 +25,9 @@ class ReservationController extends Controller
     {
         if($id){
             $reservation = FilledReservation::query();
+            $reservation
+            ->select('*')
+            ->selectRaw("str_to_date(time,'%h:%i %p') as f_time");
             $reservation->where('restaurant_id', $id);
             $search = \Request('filter');
 
@@ -98,8 +101,8 @@ class ReservationController extends Controller
                 ->where(function($row) {
                     $row->where('status', 1);
                     $row->orWhere('type', 2);
-                })
-                ->orderBy('created_at', 'DESC');
+                });
+                $reservation->orderBy('f_time', 'DESC');
                 return  $reservation->paginate(6);
             }
 
@@ -150,7 +153,6 @@ class ReservationController extends Controller
                 return $reservation->get();
             }
 
-
             if(\Request('day') == 'today'){
 
                 if( \Request('filter'))
@@ -163,8 +165,6 @@ class ReservationController extends Controller
                     $reservation->where('status', \Request('status') == 0 ? '0' : \Request('status'));
                 else
                     $reservation->whereIn('status', ['0', '2']);
-
-                $reservation->orderBy('date', 'DESC');
 
                 $reserv['paxLunch'] = $reservation->get()->map(function($row){
                     $time = date("H:i", strtotime($row->time));
@@ -186,6 +186,8 @@ class ReservationController extends Controller
                     }
 
                 })->filter()->values();
+
+                $reservation->orderBy('f_time', 'DESC');
 
                 $reserv['all'] = $reservation->paginate(6);
 

@@ -17,7 +17,6 @@ class FilledReservation extends Model
         'date' => 'datetime',
     ];
 
-
     protected $appends = ['table', 'visit'];
 
     public function getTableAttribute()
