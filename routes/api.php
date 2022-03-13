@@ -55,6 +55,7 @@ Route::group(['middleware' => 'auth:sanctum'], function () {
     Route::post('delete/{id?}', [ReservationController::class, 'destroy']);
     Route::get('restore/{id}', [ReservationController::class, 'restore']);
     Route::get('walkin', [ReservationController::class, 'walkin']);
+    Route::get('default', [ReservationController::class, 'default']);
     Route::get('all/', [ReservationController::class, 'all']);
     Route::get('deleted', [ReservationController::class, 'deleted']);
     Route::get('left', [ReservationController::class, 'left']);
