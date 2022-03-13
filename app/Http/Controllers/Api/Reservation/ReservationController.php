@@ -25,18 +25,21 @@ class ReservationController extends Controller
     {
         if($id){
             $reservation = FilledReservation::query();
+            $reservation
+            ->select('*')
+            ->selectRaw("str_to_date(time,'%h:%i %p') as f_time");
             $reservation->where('restaurant_id', $id);
             $search = \Request('filter');
 
             if(\Request('page') == 'todayTomorrow'){
-
+                $reservation->where('type', null);
                 $reservation
                 ->select('date', \DB::raw('count(*) as total'))
                 ->whereDate('date', '>=', Carbon::today())
-                ->where('status', '!=', 5)
-                ->where('status', '!=', 4);
-                return $reservation->groupBy('date')->get();
+                ->whereIn('status', ['0', '2']);
 
+                return $reservation->groupBy('date')
+                ->get();
             }
 
             if(\Request('page') == 'history'){
@@ -58,11 +61,15 @@ class ReservationController extends Controller
                 $reservation
                 ->withTrashed()
                 ->where(function($row) {
-                    $row->whereIn('status', ['0', '1', '2', '3', '4', '5']);
+                    $row->whereIn('status', ['3', '4', '5']);
                     $row->orWhere('deleted_at', '!=', null);
                 });
                 $reservation->orderBy('created_at', 'DESC');
-                return $reservation->paginate(10);
+
+                $data['count_pax'] = $reservation->sum('no_of_occupancy');
+                $data['reservation'] = $reservation->orderBy('created_at', 'DESC')->paginate(10);
+
+                return $data;
             }
 
             if(in_array(\Request('status'), ['0', '2', '3'])){
@@ -99,8 +106,8 @@ class ReservationController extends Controller
                 ->where(function($row) {
                     $row->where('status', 1);
                     $row->orWhere('type', 2);
-                })
-                ->orderBy('created_at', 'DESC');
+                });
+                $reservation->orderBy('f_time', 'DESC');
                 return  $reservation->paginate(6);
             }
 
@@ -110,7 +117,7 @@ class ReservationController extends Controller
                     if(\Request('filter'))
                         $reservation->where('name','LIKE' ,"%$search%");
 
-                    $reservation->where('status', '!=', 5);
+                    $reservation->whereIn('status', ['0', '2']);
 
                     $reservation->whereDay('date', date('d', strtotime(\Request('day'))))
                     ->whereMonth('date', date('m', strtotime(\Request('day'))))
@@ -151,20 +158,45 @@ class ReservationController extends Controller
                 return $reservation->get();
             }
 
-
             if(\Request('day') == 'today'){
 
                 if( \Request('filter'))
                     $reservation->where('name','LIKE' ,"%$search%");
 
-                $reservation->whereDate('date', Carbon::today());
                 $reservation->where('type', null);
+                $reservation->whereDate('date', Carbon::today());
 
-                if(!in_array(\Request('status'), ['0', '2', '3']))
-                    $reservation->whereIn('status', ['0', '2', '3']);
+                if(in_array(\Request('status'), ['0', '2']))
+                    $reservation->where('status', \Request('status') == 0 ? '0' : \Request('status'));
+                else
+                    $reservation->whereIn('status', ['0', '2']);
 
-                $reservation->orderBy('date', 'DESC');
-                return $reservation->paginate(6);
+                $reserv['paxLunch'] = $reservation->get()->map(function($row){
+                    $time = date("H:i", strtotime($row->time));
+                    $startTime = date("H:i", strtotime('11:30 AM'));
+                    $endTime = date("H:i", strtotime('04:29 PM'));
+
+                    if($time >= $startTime && $time <= $endTime){
+                        return $row->no_of_occupancy;
+                    }
+                })->filter()->values();
+
+                $reserv['paxDinner'] = $reservation->get()->map(function($row){
+                    $time = date("H:i", strtotime($row->time));
+                    $startTime = date("H:i", strtotime('04:30 PM'));
+                    $endTime = date("H:i", strtotime('11:59 PM'));
+
+                    if($time >= $startTime && $time <= $endTime){
+                        return $row->no_of_occupancy;
+                    }
+
+                })->filter()->values();
+
+                $reservation->orderBy('f_time', 'DESC');
+
+                $reserv['all'] = $reservation->paginate(6);
+
+                return $reserv;
             }
 
             if(\Request('day') == 'tomorrow'){
@@ -173,13 +205,14 @@ class ReservationController extends Controller
 
                 $reservation->where('type', null);
 
+                if(in_array(\Request('status'), ['0', '2']))
+                    $reservation->where('status', \Request('status') == 0 ? '0' : \Request('status'));
+                else
+                    $reservation->whereIn('status', ['0', '2']);
 
                 $reservation->whereDate('date', Carbon::tomorrow())
-                ->where('status', '!=', 5)
-                ->where('status', '!=', 4);
+                ->orderBy('date', 'DESC');
             }
-
-            // $reservation->where('status', '!=', 1);
 
             return $reservation->paginate(6);
         }
@@ -195,16 +228,12 @@ class ReservationController extends Controller
             try{
                 $input = $request->validated();
 
-                if($input['status'] == 4){
+                if(isset($input['status']) && $input['status'] == 4){
                     $input['seated_date'] = now();
                 }
 
                 FilledReservation::find($id)
                 ->update( $input );
-
-                if($input['status'] == 2){
-                    dispatch(new SendConfirmEmail(FilledReservation::find($id)));
-                }
 
                 return \Response::success(Restaurant::with('floor:id,title,restaurant_id', 'floor.table:id,title,no_of_occupany,floor_id,type_id,status,user_id', 'floor.table.tableType:id,title', 'floor.table.user')->find(1), 'Reservation Updated Successfully');
 
@@ -217,6 +246,18 @@ class ReservationController extends Controller
 
             $input = $request->validated();
             $input['restaurant_id'] = auth()->check() ? auth()->user()->restaurant_id : 1;
+
+            $checkReservation = FilledReservation::select('phone','time','id')
+            ->selectRaw("str_to_date(time,'%h:%i %p') as f_time")
+            ->where('phone', $request->phone)
+            ->get()
+            ->where('f_time', '>', Carbon::now()->subHours(8)->toDateTimeString());
+
+            // if user already reserced before 8 hrs
+            if(\Request('ignore') != 1 && $checkReservation->count() > 0 )
+            {
+                return \Response::success(false, 'Already Reserved, Still want to take Reservation?');
+            }
 
             $reservation = FilledReservation::create($input);
 
@@ -304,68 +345,189 @@ class ReservationController extends Controller
 
     public function walkin()
     {
-        $reservation = FilledReservation::query();
-        $reservation->where('restaurant_id', 1);
         $search = \Request('filter');
+        $data = collect();
+        $from = date(\Request('from'));
+        $to = date(\Request('to'));
+
+        $reservation = FilledReservation::query();
+        $reservation->where('restaurant_id', 1)
+        ->select('*')
+        ->selectRaw("str_to_date(time,'%h:%i %p') as f_time");
 
         if(!empty($search))
             $reservation->where('name','LIKE' ,"%$search%");
+
+        if(\Request('from') && \Request('to'))
+            $reservation->whereBetween('date', [$from, $to]);
+
+        if(\Request('from') && !\Request('to')) {
+            $reservation->whereDate('date', $from);
+        }
+
+        if(!\Request('from') && !\Request('to')){
+            $reservation->whereDate('date', Carbon::today());
+        }
 
         $reservation->where('type', '1')
         ->where('is_walkin', '1')
         ->orderBy('created_at', 'DESC');
 
-        return $reservation->paginate(10);
+        $data['count_pax'] = $reservation->sum('no_of_occupancy');
+        $data['reservation'] = $reservation
+        ->orderBy('f_time', 'ASC')
+        ->paginate(6);
+        return $data;
     }
 
     public function all()
     {
         $reservation = FilledReservation::query();
-        $reservation->where('restaurant_id', 1);
+        $reservation->where('restaurant_id', 1)
+        ->select('*')
+        ->selectRaw("str_to_date(time,'%h:%i %p') as f_time");
+
         $search = \Request('filter');
+        $from = date(\Request('from'));
+        $to = date(\Request('to'));
+
+        $data = collect();
 
         if(!empty($search))
             $reservation->where('name','LIKE' ,"%$search%");
 
-        $reservation->where('is_walkin', null)
-        ->orderBy('created_at', 'DESC');
+        if(\Request('from') && \Request('to'))
+            $reservation->whereBetween('date', [$from, $to]);
 
-        return $reservation
-        ->paginate(10);
+        if(!\Request('from') && !\Request('to')){
+            $reservation->whereDate('date', Carbon::today());
+        }
+
+        if(\Request('from') && !\Request('to')) {
+            $reservation->whereDate('date', \Request('from') );
+        }
+
+        $reservation->where('is_walkin', null);
+        $reservation->whereNotIn('status', ['0', '2']);
+        $reservation->orderBy('f_time', 'ASC');
+
+        $data['count_pax'] = $reservation->sum('no_of_occupancy');
+        $data['reservation'] = $reservation->paginate(6);
+        return $data;
     }
 
     public function deleted()
     {
         $reservation = FilledReservation::query();
-        $reservation->where('restaurant_id', 1);
+        $reservation->where('restaurant_id', 1)
+        ->select('*')
+        ->selectRaw("str_to_date(time,'%h:%i %p') as f_time");
+
         $search = \Request('filter');
+        $from = date(\Request('from'));
+        $to = date(\Request('to'));
+
+        $data = collect();
 
         if(!empty($search))
             $reservation->where('name','LIKE' ,"%$search%");
 
+        if(\Request('from') && \Request('to'))
+            $reservation->whereBetween('date', [$from, $to]);
+
+        if(!\Request('from') && !\Request('to')){
+            $reservation->whereDate('date', Carbon::today());
+        }
+
+        if(\Request('from') && !\Request('to')) {
+            $reservation->whereDate('date', \Request('from') );
+        }
+
         $reservation
         ->withTrashed()
-        ->where('deleted_at', '!=', null)
-        ->orderBy('deleted_at', 'DESC');
+        ->where('deleted_at', '!=', null);
+        $reservation->orderBy('f_time', 'ASC');
 
-        return $reservation
-        ->paginate(10);
+        $data['count_pax'] = $reservation->sum('no_of_occupancy');
+        $data['reservation'] = $reservation->paginate(6);
+
+        return $data;
     }
 
     public function left()
     {
         $reservation = FilledReservation::query();
-        $reservation->where('restaurant_id', 1);
+        $reservation->where('restaurant_id', 1)
+        ->select('*')
+        ->selectRaw("str_to_date(time,'%h:%i %p') as f_time");
+
+        $search = \Request('filter');
+        $from = date(\Request('from'));
+        $to = date(\Request('to'));
+
+        if(!empty($search))
+            $reservation->where('name','LIKE' ,"%$search%");
+
+        if(\Request('from') && \Request('to'))
+        $reservation->whereBetween('date', [$from, $to]);
+
+        if(!\Request('from') && !\Request('to')){
+            $reservation->whereDate('date', Carbon::today());
+        }
+
+        if(\Request('from') && !\Request('to')) {
+            $reservation->whereDate('date', \Request('from') );
+        }
+
+        $reservation->orderBy('f_time', 'ASC');
+
+        $reservation
+        ->where('status', 5);
+
+        $data['count_pax'] = $reservation->sum('no_of_occupancy');
+        $data['reservation'] = $reservation->paginate(6);
+
+        return $data;
+    }
+
+    public function default()
+    {
+        $reservation = FilledReservation::query();
+
+        $reservation->where('restaurant_id', 1)
+        ->select('*')
+        ->selectRaw("str_to_date(time,'%h:%i %p') as f_time");
+
+        $from = date(\Request('from'));
+        $to = date(\Request('to'));
         $search = \Request('filter');
 
         if(!empty($search))
             $reservation->where('name','LIKE' ,"%$search%");
 
-        $reservation
-        ->where('status', 5)
-        ->orderBy('created_at', 'DESC');
+        if(\Request('from') && \Request('to'))
+            $reservation->whereBetween('date', [$from, $to]);
 
-        return $reservation
-        ->paginate(10);
+        if(!\Request('from') && !\Request('to')){
+            $reservation->whereDate('date', Carbon::today());
+        }
+
+        if(\Request('from') && !\Request('to')) {
+            $reservation->whereDate('date', \Request('from') );
+        }
+
+        $reservation
+        ->withTrashed()
+        ->where(function($row) {
+            $row->whereNotIn('status', ['0', '2']);
+            $row->orWhere('deleted_at', '!=', null);
+        });
+
+        $reservation->orderBy('f_time', 'ASC');
+
+        $data['count_pax'] = $reservation->sum('no_of_occupancy');
+        $data['reservation'] = $reservation->paginate(6);
+
+        return $data;
     }
 }

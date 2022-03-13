@@ -16,7 +16,6 @@ class FilledReservation extends Model
     protected $casts = [
         'date' => 'datetime',
     ];
-    
 
     protected $appends = ['table', 'visit'];
 
