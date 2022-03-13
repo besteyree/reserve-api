@@ -409,7 +409,7 @@ class ReservationController extends Controller
 
         $reservation->where('is_walkin', null);
         $reservation->whereNotIn('status', ['0', '2']);
-        $reservation->orderBy('f_time', 'DESC');
+        $reservation->orderBy('f_time', 'ASC');
 
         $data['count_pax'] = $reservation->sum('no_of_occupancy');
         $data['reservation'] = $reservation->paginate(6);
@@ -446,7 +446,7 @@ class ReservationController extends Controller
         $reservation
         ->withTrashed()
         ->where('deleted_at', '!=', null);
-        $reservation->orderBy('f_time', 'DESC');
+        $reservation->orderBy('f_time', 'ASC');
 
         $data['count_pax'] = $reservation->sum('no_of_occupancy');
         $data['reservation'] = $reservation->paginate(6);
@@ -479,11 +479,10 @@ class ReservationController extends Controller
             $reservation->whereDate('date', \Request('from') );
         }
 
-        $reservation->orderBy('f_time', 'DESC');
+        $reservation->orderBy('f_time', 'ASC');
 
         $reservation
-        ->where('status', 5)
-        ->orderBy('created_at', 'DESC');
+        ->where('status', 5);
 
         $data['count_pax'] = $reservation->sum('no_of_occupancy');
         $data['reservation'] = $reservation->paginate(6);
@@ -524,7 +523,7 @@ class ReservationController extends Controller
             $row->orWhere('deleted_at', '!=', null);
         });
 
-        $reservation->orderBy('f_time', 'DESC');
+        $reservation->orderBy('f_time', 'ASC');
 
         $data['count_pax'] = $reservation->sum('no_of_occupancy');
         $data['reservation'] = $reservation->paginate(6);
