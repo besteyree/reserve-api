@@ -117,6 +117,7 @@ class ReservationController extends Controller
                     if(\Request('filter'))
                         $reservation->where('name','LIKE' ,"%$search%");
 
+                    $reservation->where('type', null);
                     $reservation->whereIn('status', ['0', '2']);
 
                     $reservation->whereDay('date', date('d', strtotime(\Request('day'))))
