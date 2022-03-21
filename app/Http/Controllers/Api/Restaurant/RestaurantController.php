@@ -58,15 +58,14 @@ class RestaurantController extends Controller
         }catch(\Exception $e) {
             \Response::failed($e, 'Restaurant deleted failed');
         }
-
     }
 
     public function analytic()
     {
-
         $from = date(\Request('from'));
         $to = date(\Request('to'));
         $reservation = FilledReservation::query();
+        $reservation->where('restaurant_id', auth()->user()->restaurant_id);
 
         if(\Request('from') && \Request('to'))
             $reservation->whereBetween('date', [$from, $to]);
@@ -81,8 +80,8 @@ class RestaurantController extends Controller
 
         $reservation->where('is_walkin', '=', null);
 
-
         $walkin = FilledReservation::query();
+        $walkin->where('restaurant_id', auth()->user()->restaurant_id);
 
         $walkin->where('is_walkin', '=', 1);
 

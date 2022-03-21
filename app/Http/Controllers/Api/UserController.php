@@ -77,6 +77,6 @@ class UserController extends Controller
     }
 
     public function getUser($restaurant_id){
-        return User::where('restaurant_id', $restaurant_id)->get();
+        return User::where('restaurant_id', auth()->user()->restaurant_id)->get();
     }
 }

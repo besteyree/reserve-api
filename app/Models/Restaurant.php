@@ -31,6 +31,7 @@ class Restaurant extends Model
     public function getActiveReservationAttribute()
     {
         return FilledReservation::whereIn('status', ['0', '2', '3'])
+        ->where('restaurant_id', $this->id)
         ->whereDate('date', Carbon::now())
         ->count();
     }
@@ -38,6 +39,7 @@ class Restaurant extends Model
     public function getWaitingAttribute()
     {
         return FilledReservation::where('status', 1)
+        ->where('restaurant_id', $this->id)
         ->whereDate('date', Carbon::now())
         ->count();
     }
@@ -46,6 +48,7 @@ class Restaurant extends Model
     public function getSeatedAttribute()
     {
         return FilledReservation::where('status', 4)
+        ->where('restaurant_id', $this->id)
         ->whereDate('date', Carbon::now())
         ->count();
     }
@@ -54,15 +57,18 @@ class Restaurant extends Model
     public function getCheckoutAttribute()
     {
         return FilledReservation::where('status', 5)
+        ->where('restaurant_id', $this->id)
         ->count();
     }
 
     public function getWalkinAttribute()
     {
         $reservation = FilledReservation::where('is_walkin', '=', null)
+        ->where('restaurant_id', $this->id)
         ->sum('no_of_occupancy');
 
         $walkin = FilledReservation::where('is_walkin', '=', 1)
+        ->where('restaurant_id', $this->id)
         ->count('no_of_occupancy');
 
         return [
@@ -73,8 +79,8 @@ class Restaurant extends Model
 
     public function getCusGroupAttribute()
     {
-        $kids = FilledReservation::sum('kids');
-        $adults = FilledReservation::sum('adults');
+        $kids = FilledReservation::where('restaurant_id', $this->id)->sum('kids');
+        $adults = FilledReservation::where('restaurant_id', $this->id)->sum('adults');
 
         return [
             'kids' => $kids,
@@ -84,7 +90,7 @@ class Restaurant extends Model
 
     public function getSourceAttribute()
     {
-        $source = FilledReservation::get()
+        $source = FilledReservation::where('restaurant_id', $this->id)->get()
         ->groupBy('source')
         ->map(function($row){
             return $row->count();
@@ -94,7 +100,7 @@ class Restaurant extends Model
 
     public function getCustomerAttribute()
     {
-        $customer = FilledReservation::get()
+        $customer = FilledReservation::where('restaurant_id', $this->id)->get()
         ->groupBy('visit')
         ->map(function($row){
             return $row->count();
@@ -106,10 +112,12 @@ class Restaurant extends Model
     public function getNotAppearAttribute()
     {
         $not = FilledReservation::whereIn('status', [0, 2])
+        ->where('restaurant_id', $this->id)
         ->whereDate('date', '<', Carbon::now()->format('Y-m-d'))
         ->count();
 
         $appear = FilledReservation::where('status', 5)
+        ->where('restaurant_id', $this->id)
         ->whereDate('date', '<', Carbon::now()->format('Y-m-d'))
         ->count();
 
@@ -129,6 +137,7 @@ class Restaurant extends Model
         for($i=1; $i <= $endOfMonth ; $i++){
             $total = FilledReservation::
             where('is_walkin', 1)
+            ->where('restaurant_id', $this->id)
             ->whereDay('date', $i)
             ->count();
             $dataDay->push([
@@ -139,6 +148,7 @@ class Restaurant extends Model
 
             $totalRes = FilledReservation::
             where('is_walkin', null)
+            ->where('restaurant_id', $this->id)
             ->whereDay('date', $i)
             ->count();
             $dataDay->push([
@@ -165,6 +175,7 @@ class Restaurant extends Model
 
         for($i=1; $i <= 12 ; $i++){
             $total = FilledReservation::where('is_walkin', 1)
+            ->where('restaurant_id', $this->id)
             ->whereMonth('date', $i)
             ->count();
             $dataMonth->push([
@@ -175,6 +186,7 @@ class Restaurant extends Model
 
             $totalRes = FilledReservation::
             where('is_walkin', null)
+            ->where('restaurant_id', $this->id)
             ->whereMonth('date', $i)
             ->count();
             $dataMonth->push([
@@ -196,6 +208,7 @@ class Restaurant extends Model
 
         for($i=1; $i <= 7 ; $i++){
             $total = FilledReservation::where('is_walkin', 1)
+            ->where('restaurant_id', $this->id)
             ->whereBetween('date', [Carbon::now()->startOfWeek()->format('Y-m-d') , Carbon::now()->endOfWeek()->format('Y-m-d')])
             ->get()
             ->map(function($row) {
@@ -210,6 +223,7 @@ class Restaurant extends Model
             ]);
 
             $totalRes = FilledReservation::where('is_walkin', null)
+            ->where('restaurant_id', $this->id)
             ->whereBetween('date', [Carbon::now()->startOfWeek()->format('Y-m-d') , Carbon::now()->endOfWeek()->format('Y-m-d')])
             ->get()
             ->map(function($row) {
@@ -238,18 +252,21 @@ class Restaurant extends Model
             $row->where('status', 1);
             $row->orWhere('type', 2);
         })
+        ->where('restaurant_id', $this->id)
         ->count();
 
         $restaurants['two'] =  FilledReservation::where(function($row) {
                 $row->where('status', 1);
                 $row->orWhere('type', 2);
             })
+            ->where('restaurant_id', $this->id)
             ->where('no_of_occupancy', '>', '0')
             ->where('no_of_occupancy', '<', '4')->count();
         $restaurants['three'] = FilledReservation::where(function($row) {
                 $row->where('status', 1);
                 $row->orWhere('type', 2);
             })
+            ->where('restaurant_id', $this->id)
             ->where('no_of_occupancy', '>', '3')
             ->where('no_of_occupancy', '<', '6')->count();
 
@@ -257,6 +274,7 @@ class Restaurant extends Model
                 $row->where('status', 1);
                 $row->orWhere('type', 2);
             })
+            ->where('restaurant_id', $this->id)
             ->where('no_of_occupancy', '>', '5')
             ->where('no_of_occupancy', '<', '9')
             ->count();
@@ -265,6 +283,7 @@ class Restaurant extends Model
                 $row->where('status', 1);
                 $row->orWhere('type', 2);
             })
+            ->where('restaurant_id', $this->id)
             ->where('no_of_occupancy', '>', '8')
             ->count();
 
