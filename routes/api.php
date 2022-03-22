@@ -46,7 +46,7 @@ Route::group(['middleware' => 'auth:sanctum'], function () {
     Route::post('search-user-phone', [ReservationController::class, 'getUserFmPhone']);
     Route::get('get-users/{restaurant_id}', [UserController::class, 'getUser']);
     Route::get('analytic', [RestaurantController::class, 'analytic']);
-
+    Route::post('restaurants/filled-reservation', [ReservationController::class, 'storeUpdate']);
 
     // reservation related
     Route::get('reservation/{id?}', [ReservationController::class, 'index']);

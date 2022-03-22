@@ -28,7 +28,9 @@ class ReservationController extends Controller
             $reservation
             ->select('*')
             ->selectRaw("str_to_date(time,'%h:%i %p') as f_time");
-            $reservation->where('restaurant_id', $id);
+
+            $reservation->where('restaurant_id', auth()->user()->restaurant_id);
+
             $search = \Request('filter');
 
             if(\Request('page') == 'todayTomorrow'){
@@ -117,6 +119,7 @@ class ReservationController extends Controller
                     if(\Request('filter'))
                         $reservation->where('name','LIKE' ,"%$search%");
 
+                    $reservation->where('type', null);
                     $reservation->whereIn('status', ['0', '2']);
 
                     $reservation->whereDay('date', date('d', strtotime(\Request('day'))))
@@ -243,12 +246,12 @@ class ReservationController extends Controller
         }
 
         try{
-
             $input = $request->validated();
             $input['restaurant_id'] = auth()->check() ? auth()->user()->restaurant_id : 1;
 
             $checkReservation = FilledReservation::select('phone','time','id')
             ->selectRaw("str_to_date(time,'%h:%i %p') as f_time")
+            ->where('restaurant_id', auth()->user()->restaurant_id)
             ->where('phone', $request->phone)
             ->get()
             ->where('f_time', '>', Carbon::now()->subHours(8)->toDateTimeString());
@@ -321,7 +324,8 @@ class ReservationController extends Controller
     public function getUserFmPhone(Request $request)
     {
         return FilledReservation::where('phone', $request->phone)
-        ->first();
+        ->where('restaurant_id', auth()->user()->restaurant_id)
+        ->first();;
     }
 
     public function saveToken(Request $request){
@@ -351,7 +355,7 @@ class ReservationController extends Controller
         $to = date(\Request('to'));
 
         $reservation = FilledReservation::query();
-        $reservation->where('restaurant_id', 1)
+        $reservation->where('restaurant_id', auth()->user()->restaurant_id)
         ->select('*')
         ->selectRaw("str_to_date(time,'%h:%i %p') as f_time");
 
@@ -383,7 +387,7 @@ class ReservationController extends Controller
     public function all()
     {
         $reservation = FilledReservation::query();
-        $reservation->where('restaurant_id', 1)
+        $reservation->where('restaurant_id', auth()->user()->restaurant_id)
         ->select('*')
         ->selectRaw("str_to_date(time,'%h:%i %p') as f_time");
 
@@ -419,7 +423,7 @@ class ReservationController extends Controller
     public function deleted()
     {
         $reservation = FilledReservation::query();
-        $reservation->where('restaurant_id', 1)
+        $reservation->where('restaurant_id', auth()->user()->restaurant_id)
         ->select('*')
         ->selectRaw("str_to_date(time,'%h:%i %p') as f_time");
 
@@ -457,7 +461,7 @@ class ReservationController extends Controller
     public function left()
     {
         $reservation = FilledReservation::query();
-        $reservation->where('restaurant_id', 1)
+        $reservation->where('restaurant_id', auth()->user()->restaurant_id)
         ->select('*')
         ->selectRaw("str_to_date(time,'%h:%i %p') as f_time");
 
@@ -494,7 +498,7 @@ class ReservationController extends Controller
     {
         $reservation = FilledReservation::query();
 
-        $reservation->where('restaurant_id', 1)
+        $reservation->where('restaurant_id', auth()->user()->restaurant_id)
         ->select('*')
         ->selectRaw("str_to_date(time,'%h:%i %p') as f_time");
 
@@ -519,7 +523,7 @@ class ReservationController extends Controller
         $reservation
         ->withTrashed()
         ->where(function($row) {
-            $row->whereNotIn('status', ['0', '2']);
+            $row->whereNotIn('status', ['0', '2', '1']);
             $row->orWhere('deleted_at', '!=', null);
         });
 
