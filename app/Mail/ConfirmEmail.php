@@ -18,6 +18,7 @@ class ConfirmEmail extends Mailable
      */
     protected string $disruptedEmailAddress;
     protected string $name;
+    
     public function __construct( $disruptedEmailAddress, $name )
     {
         $this->disruptedEmailAddress = $disruptedEmailAddress;

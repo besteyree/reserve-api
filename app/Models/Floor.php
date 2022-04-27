@@ -8,11 +8,10 @@ use Illuminate\Database\Eloquent\Model;
 class Floor extends Model
 {
     use HasFactory;
-    protected $guarded = [];
-
-    public function table()
-    {
-        return $this->hasMany(Table::class);
-    }
+    public $table = "floors";
+    protected $fillable = [
+        'title',
+        'restaurant_id',
+    ];
 
 }

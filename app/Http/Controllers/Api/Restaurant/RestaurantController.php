@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Api\Restaurant;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\RestaurantRequest;
 use App\Models\FilledReservation;
+use App\Models\User;
 use App\Models\Restaurant;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
@@ -23,6 +24,7 @@ class RestaurantController extends Controller
         ->where('user_id', auth()->id())->paginate(6);
     }
 
+    //not working
     public function storeUpdate(RestaurantRequest $request, $id=null)
     {
 
@@ -101,4 +103,82 @@ class RestaurantController extends Controller
             'walkin' => $walkin->sum('no_of_occupancy')
         ];
     }
+
+
+    //fetch reataurant
+    public function getvendor_restaurant($id = null)
+    {
+        # code...
+        if (auth()->user()->user_type == 1 || auth()->user()->user_type == 2) {
+
+            if ($id) {
+                return Restaurant::find($id);
+            } 
+
+            if(auth()->user()->user_type ==2){
+                 return Restaurant::where('user_id', '=' ,auth()->user()->id)->get();
+            }
+
+            if(auth()->user()->user_type ==1){
+                return Restaurant::paginate(10);
+
+            }
+        }
+    }
+
+//create and update restaurant
+    public function getvendor_restaurant_store_update(Request $request, $id = null)
+    {
+        # code...
+        if (auth()->user()->user_type == 1) {
+            if ($id == null) {
+                try {
+                    $restaurant = new Restaurant;
+                    $restaurant->title = $request->input('title');
+                    $restaurant->phone = $request->input('phone');
+                    $restaurant->additional_phone = $request->input('additional_phone');
+                    $restaurant->opening_time = $request->input('opening_time');
+                    $restaurant->closing_time = $request->input('closing_time');
+                    $restaurant->detail = $request->input('detail');
+                    $restaurant->max_table_occupancy = $request->input('max_table_occupancy');
+                    $restaurant->status = $request->input('status');
+                    $restaurant->user_id = $request->input('user_id');
+                    $restaurant->save();
+                    // return $restaurant->id;
+
+                    $user = User::find($restaurant->user_id);
+                    $user->restaurant_id = $restaurant->id;
+                    $user->update(); 
+                    
+                    return response()->json(['message' => 'Restaurant Created Successfully ']);
+                } catch (Exception $e) {
+                    return response()->json(['message' => 'Failed']);
+                }
+            }
+
+            if ($id) {
+                try {
+                    $restaurant = Restaurant::find($id);
+                    $restaurant->title = $request->input('title');
+                    $restaurant->phone = $request->input('phone');
+                    $restaurant->additional_phone = $request->input('additional_phone');
+                    $restaurant->closing_time = $request->input('closing_time');
+                    $restaurant->detail = $request->input('detail');
+                    $restaurant->max_table_occupancy = $request->input('max_table_occupancy');
+                    $restaurant->status = $request->input('status');
+                    $restaurant->user_id = $request->input('user_id');
+                    $restaurant->update();
+                    return response()->json(['message' => 'Restaurant Updated Successfully ']);
+                } catch (Exception $e) {
+                    return response()->json(['message' => 'Failed']);
+                }
+            }
+        }
+    }
+
+
+
+
+
+    
 }

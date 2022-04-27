@@ -6,27 +6,53 @@ use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
+
+
 class Restaurant extends Model
 {
     use HasFactory;
     protected $guarded = [];
 
-    protected $appends = ['customer', 'source', 'cus_group', 'active_reservation', 'waiting', 'seated', 'checkout', 'reservation_graph', 'not_appear', 'walkin', 'reservation_count'];
+    protected $appends = ['customer', 'floor', 'tabletype', 'source', 'cus_group', 'active_reservation', 'waiting', 'seated', 'checkout', 'reservation_graph', 'not_appear', 'walkin', 'reservation_count', 'sms'];
 
     public function tableType()
     {
         return $this->hasMany(TableType::class);
     }
 
-    public function floor()
+    public function getFloorAttribute()
     {
-        return $this->hasMany(Floor::class);
+        // $floor = $this->hasMany(Floor::class)->where('restaurant_id', $this->id);
+        $floor  = Floor::where('restaurant_id', $this->id)->get();
+        return [
+            'floor' => $floor,
+        ];
+    }
+
+    public function getTableTypeAttribute()
+    {
+        // $floor = $this->hasMany(Floor::class)->where('restaurant_id', $this->id);
+        $tabletype  = TableType::where('restaurant_id', $this->id)->get();
+        return [
+            'tabletype' => $tabletype,
+        ];
+    }
+
+    public function getSmsAttribute()
+    {
+        // $floor = $this->hasMany(Floor::class)->where('restaurant_id', $this->id);
+        $sms  = Sms_Message::where('restaurant_id', $this->id)->count();
+        return [
+            'sms' => $sms,
+        ];
     }
 
     public function location()
     {
         return $this->morphTo(Location::class, 'id');
     }
+
+
 
     public function getActiveReservationAttribute()
     {
