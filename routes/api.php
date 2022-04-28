@@ -81,6 +81,7 @@ Route::group(['middleware' => 'auth:sanctum'], function () {
     Route::post('floor_update/{id?}', [FloorController::class, 'update']);
     Route::get('floor_delete/{id}', [FloorController::class, 'destroy']);
     Route::get('get_floor/{id?}', [FloorController::class, 'getFloorDetailsById']);
+    Route::get('get_floor_form/{id?}', [FloorController::class, 'floorForm']);
 
     //table types
     Route::get('table_type/{id?}', [TableTypeController::class, 'index']);
@@ -88,6 +89,7 @@ Route::group(['middleware' => 'auth:sanctum'], function () {
     Route::post('table-types_update/{id?}', [TableTypeController::class, 'update']);
     Route::get('table-types_delete/{id?}', [TableTypeController::class, 'destroy']);
     Route::get('get_table_type/{id?}', [TableTypeController::class, 'getTableTypeDetailsById']);
+    Route::get('get_table_type_form/{id?}', [TableTypeController::class, 'tableTypeForm']);
 
 
     // vendor(admin)
@@ -100,6 +102,9 @@ Route::group(['middleware' => 'auth:sanctum'], function () {
     //table generate
     Route::post('tablegenerrate/{id?}', [TableController::class, 'resttable']);
     Route::get('get_table/{id?}', [TableController::class, 'getTableDetailsById']);
+
+    // grouping the table
+    Route::get('group_table/{id?}', [TableController::class, 'groupTable']);
 
     //get all the restaurants
     Route::get('getvendor_restaurant/{id?}', [RestaurantController::class, 'getvendor_restaurant']);

@@ -11,16 +11,23 @@ class FloorController extends Controller
 {
     public function index($id = null)
     {
-        
-        if ($id) {
-            return Floor::where('restaurant_id', $id)->get();
+
+        if($id){
+            return Floor::where('restaurant_id',$id)->get();
         }
 
-        if (auth()->user()->user_type == 2)
-       { 
-            return Floor::where('restaurant_id', auth()->user()->restaurant_id)->get();
+        if(auth()->user()->user_type == 2)
+            return Floor::get();
+        
+    //     if ($id) {
+    //         return Floor::where('restaurant_id', $id)->get();
+    //     }
+
+    //     if (auth()->user()->user_type == 2)
+    //    { 
+    //         return Floor::where('restaurant_id', auth()->user()->restaurant_id)->get();
     
-        }  
+    //     }  
     
     }
 
@@ -86,17 +93,10 @@ class FloorController extends Controller
         }
     }
 
-    // public function getFloorDetailsById($id)
-    // {
-    //     $floor = Floor::find($id);
-    //     return $floor;
-    // }
-
-
     public function getFloorDetailsById($id = null)
     {
-        if ($id) {
-            return Floor::find($id);
+        if($id){
+            return Floor::where('restaurant_id', $id)->paginate(6);
         }
 
         $restaurant_id = auth()->user()->restaurant_id;
@@ -104,5 +104,10 @@ class FloorController extends Controller
         $restaurant_tables = Floor::where('restaurant_id', $restaurant_id);
 
         return  $restaurant_tables->paginate(6);
+    }
+
+    public function floorForm($id){
+        $fl = Floor::find($id);
+        return $fl;
     }
 }

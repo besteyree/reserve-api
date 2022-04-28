@@ -170,20 +170,30 @@ class TableController extends Controller
 
 
 //fetch and get details
-    public function getTableDetailsById($id = null)
+    public function getTableDetailsById($limit)
     {
         # code...
-        if ($id) {
-            return Table::find($id);
-        }
+        // if ($id) {
+        //     return Table::find($id);
+        // }
 
+        $mylimit = explode(',', $limit);
+        
         $restaurant_id = auth()->user()->restaurant_id;
 
-        $restaurant_tables = Table::where('restaurant_id', $restaurant_id);
+        return $restaurant_tables = Table::where('restaurant_id', $restaurant_id)
+        ->whereBetween('id', $mylimit)
+        ->paginate(6);
 
-        return  $restaurant_tables->paginate(6);
+        // return  $restaurant_tables->paginate(6);
     }
 
+    public function groupTable($id = null){
+        $grp = Table::selectRaw("CONCAT(MIN(`id`), ',', MAX(`id`)) AS AllId,
+        CONCAT(MIN(`title`), '-', MAX(`title`)) AS value, no_of_occupany")
+        ->where("restaurant_id", auth()->user()->restaurant_id)->groupBy('no_of_occupany')
+        ->paginate(6);
 
-    
+        return $grp;
+    }
 }

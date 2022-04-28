@@ -11,18 +11,19 @@ class TableTypeController extends Controller
 {
     public function index($id = null)
     {
-        // $restaurant_id = auth()->user()->restaurant_id;
-
-        // $restaurant_tables = TableType::where('restaurant_id', $restaurant_id);
-
-        // return  $restaurant_tables->paginate(6);
-
-        if ($id) {
+        if($id){
             return TableType::where('restaurant_id', $id)->get();
         }
 
-        if (auth()->user()->user_type == 2)
-            return TableType::where('restaurant_id', auth()->user()->restaurant_id)->get();
+        if(auth()->user()->user_type == 2)
+            return TableType::paginate(6);
+
+        // if ($id) {
+        //     return TableType::where('restaurant_id', $id)->get();
+        // }
+
+        // if (auth()->user()->user_type == 2)
+        //     return TableType::where('restaurant_id', auth()->user()->restaurant_id)->get();
 
     }
 
@@ -99,8 +100,8 @@ class TableTypeController extends Controller
         // return $tb;
 
         if ($id) {
-            $tb = TableType::find($id);
-            return $tb;
+            $tb = TableType::where('restaurant_id', $id);
+            return $tb->paginate(6);
         }
 
         $restaurant_id = auth()->user()->restaurant_id;
@@ -108,5 +109,10 @@ class TableTypeController extends Controller
         $restaurant_tables = TableType::where('restaurant_id', $restaurant_id);
 
         return  $restaurant_tables->paginate(6);
+    }
+
+    public function tableTypeForm($id){
+        $tb = TableType::find($id);
+        return $tb;
     }
 }
