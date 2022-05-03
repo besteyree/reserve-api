@@ -8,16 +8,17 @@ use Illuminate\Support\Facades\DB;
 
 class RestaurantStatisticsController extends Controller
 {
-    public function restaurant_statistics($id = null)
+    public function restaurant_statistics(Request $request, $id = null)
     {
         # code...
         // yesterday Date (formate : Y.M.D)
         // $date = date('Y-m-d', strtotime("-1 days"));
 
         $appends = ['reservation_seated', 'reservation', '$is_walkin ', 'reservation_repeated','total_seated'];
+        
+       
 
-
-        $date = date('Y-m-d');
+        $date = $request->d;
 
         //reservation 
         $data =  DB::table('filled_reservations')
@@ -98,9 +99,9 @@ class RestaurantStatisticsController extends Controller
         return [
             'reservation' => $reservation,
             'reservation_seated' => $reservation_seated,
-            '$is_walkin ' => $is_walkin,
+            'is_walkin' => $is_walkin,
             'reservation_repeated' => $reservation_repeated,
-            'total_seated '=>  $total_seated 
+            'total_seated'=>  $total_seated 
 
         ];
     }

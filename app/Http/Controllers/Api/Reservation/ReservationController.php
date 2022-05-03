@@ -581,14 +581,16 @@ class ReservationController extends Controller
         return \Response::success(true, "Thank You! Reservation sent for Confirmation.");
     }
 
-    public function getvendor_reservation()
+    public function getvendor_reservation(Request $request)
     {
 
         $restaurant_id = auth()->user()->restaurant_id;
         
-        $reservation = FilledReservation::
-                where('restaurant_id',$restaurant_id);
-
+        $reservation = FilledReservation::where('restaurant_id',$restaurant_id);
+                if($request->date)
+                {
+                   $reservation->where("date", "=", $request->date);
+                }
 
               return  $reservation->paginate(6);
 
@@ -645,21 +647,26 @@ class ReservationController extends Controller
     }
 
 
-    public function reservation_is_walking(){
-        $reservation_is_walking = DB::table('filled_reservations')
-         ->where('is_walkin', '=', 1)
-         ->where("restaurant_id","=",auth()->user()->restaurant_id)
-         ->paginate(6);
+    public function reservation_is_walking(Request $request){
+   
+        $reservation_is_walking = FilledReservation::where('is_walkin', '=', 1)
+         ->where("restaurant_id","=",auth()->user()->restaurant_id);
+        //  return $request->date;
+         if($request->date != "")
+         {
+            $reservation_is_walking->where("date", "=", $request->date);
+         }
+         return $reservation_is_walking->paginate(6);
 
-            return $reservation_is_walking;
-    }
+        }
 
-    public function reservation_is(){
-        $reservation_is_walking = DB::table('filled_reservations')
-         ->whereRaw('(is_walkin = 0 or is_walkin is null)')
-         ->where( [["restaurant_id","=",auth()->user()->restaurant_id]])
-         ->paginate(6);
-
-            return $reservation_is_walking;
+    public function reservation_is(Request $request){
+        $reservation_is_walking = FilledReservation::whereRaw('(is_walkin = 0 or is_walkin is null)')
+         ->where( [["restaurant_id","=",auth()->user()->restaurant_id]]);
+         if($request->date!="")
+         {
+            $reservation_is_walking->where("date", "=", $request->date);
+         }
+            return $reservation_is_walking ->paginate(6);
     }
 }

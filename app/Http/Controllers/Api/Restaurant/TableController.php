@@ -165,11 +165,10 @@ class TableController extends Controller
         } catch (Exception $e) {
             return response()->json(['message' => 'Failed']);
         }
-        
     }
 
 
-//fetch and get details
+    //fetch and get details
     public function getTableDetailsById($limit)
     {
         # code...
@@ -178,22 +177,54 @@ class TableController extends Controller
         // }
 
         $mylimit = explode(',', $limit);
-        
+
         $restaurant_id = auth()->user()->restaurant_id;
 
-        return $restaurant_tables = Table::where('restaurant_id', $restaurant_id)
-        ->whereBetween('id', $mylimit)
-        ->paginate(6);
+        return $restaurant_tables = Table::select('*', 'id as AllId')->where('restaurant_id', $restaurant_id)
+            ->whereBetween('id', $mylimit)
+            ->get();
 
         // return  $restaurant_tables->paginate(6);
     }
 
-    public function groupTable($id = null){
-        $grp = Table::selectRaw("CONCAT(MIN(`id`), ',', MAX(`id`)) AS AllId,
-        CONCAT(MIN(`title`), '-', MAX(`title`)) AS value, no_of_occupany")
-        ->where("restaurant_id", auth()->user()->restaurant_id)->groupBy('no_of_occupany')
-        ->paginate(6);
+    public function groupTable($id = null)
+    {
+        $grp = DB::select("
+        SELECT
+CONCAT(MIN(`id`), ',', MAX(`id`)) AS AllId,
+CONCAT(MIN(`title`), '-', MAX(`title`)) AS title
+,`no_of_occupany`
+FROM
+(
+    SELECT `title`,
+        @row_number:=CASE
+            WHEN @id = `no_of_occupany` THEN @row_number
+            ELSE @row_number + 1
+        END AS num,
+        @id:=`no_of_occupany` as no_of_occupany,
+        id
+    FROM tables, (SELECT @row_number:=0, @id := 1) t
+    WHERE `restaurant_id` = '".auth()->user()->restaurant_id."' 
+    ORDER BY id
+) t
+
+GROUP BY num
+        ");
 
         return $grp;
     }
 }
+
+
+// DB::table("where_subquery_group_3_ t")
+// ->select("min (id) as low", "max (id) as high", "@row_number", "@id")
+// ->addSelect(DB::raw("case when @id = `no_of_occupany` then @row_number else @row_number + 1 end as num, @id: = `no_of_occupany`"))
+// ->where("`restaurant_id`", "=", 1)
+// ->orderBy("id",")","t","where","t.`no_of_occupany`","=","4","group","by")
+// ->get();
+
+
+// SELECT COUNT(*),
+// CONCAT(MIN(`id`), ',', MAX(`id`)) AS AllId,
+// CONCAT(MIN(`title`), '-', MAX(`title`)) AS title, `no_of_occupany` FROM tables
+// WHERE `restaurant_id` = 1 GROUP BY `no_of_occupany`

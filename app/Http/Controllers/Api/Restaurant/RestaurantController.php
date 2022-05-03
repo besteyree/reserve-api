@@ -143,7 +143,11 @@ class RestaurantController extends Controller
                     $restaurant->max_table_occupancy = $request->input('max_table_occupancy');
                     $restaurant->status = $request->input('status');
                     $restaurant->user_id = $request->input('user_id');
+
+                    
                     $restaurant->save();
+
+                    return $restaurant;
                     // return $restaurant->id;
 
                     $user = User::find($restaurant->user_id);
