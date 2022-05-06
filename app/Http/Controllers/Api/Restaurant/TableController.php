@@ -180,8 +180,8 @@ class TableController extends Controller
 
         $restaurant_id = auth()->user()->restaurant_id;
 
-        return $restaurant_tables = Table::select('*', 'id as AllId')->where('restaurant_id', $restaurant_id)
-            ->whereBetween('id', $mylimit)
+        return $restaurant_tables = Table::select('tables.*','floors.id as  fid','floors.title as FloorTitle', 'tables.id as AllId')->join('floors','floors.id','=','tables.floor_id')->where('tables.restaurant_id', $restaurant_id)
+            ->whereBetween('tables.id', $mylimit)
             ->get();
 
         // return  $restaurant_tables->paginate(6);
@@ -189,32 +189,42 @@ class TableController extends Controller
 
     public function groupTable($id = null)
     {
-        $grp = DB::select("
-        SELECT
-CONCAT(MIN(`id`), ',', MAX(`id`)) AS AllId,
-CONCAT(MIN(`title`), '-', MAX(`title`)) AS title
-,`no_of_occupany`
-FROM
-(
-    SELECT `title`,
-        @row_number:=CASE
-            WHEN @id = `no_of_occupany` THEN @row_number
+        $grp = DB::select("select CONCAT(MIN(t.id), ',', MAX(t.id)) AS AllId,
+        CONCAT(MIN(t.title), '-', MAX(t.title)) AS title,floors.id as fid, floors.title as FloorTitle,
+        REGEXP_REPLACE(t.title, '[^a-zA-Z]+$','') as  mintit,
+        t.id,
+        no_of_occupany,
+        num
+        FROM floors, 
+        ( SELECT tables.title,floor_id,
+            @row_number:=CASE
+            WHEN @id = no_of_occupany THEN @row_number
             ELSE @row_number + 1
-        END AS num,
-        @id:=`no_of_occupany` as no_of_occupany,
-        id
-    FROM tables, (SELECT @row_number:=0, @id := 1) t
-    WHERE `restaurant_id` = '".auth()->user()->restaurant_id."' 
-    ORDER BY id
-) t
+            END AS num,
+            @id:=no_of_occupany as no_of_occupany,    
+            tables.id
+            FROM tables, (SELECT @row_number:=0, @id := 1) t
+            WHERE restaurant_id ='".auth()->user()->restaurant_id."'
+            ORDER BY id
+        ) t
+        WHERE floors.id = t.floor_id
+        GROUP BY mintit, num
+        ORDER BY fid, t.no_of_occupany");
 
-GROUP BY num
+        
+        return $grp;
+    }
+
+    public function assignTable(){
+        $assign = DB::select("
+        SELECT t.`id`, t.`title`, t.`no_of_occupany`, t.`status`, t.`type_id`, t.`floor_id` as fid, t.`user_id`, f.title as FloorTitle FROM tables as t, floors as f WHERE t.floor_id = f.id AND t.status = 0 AND t.restaurant_id = '".auth()->user()->restaurant_id."' Order By f.id
         ");
 
-        return $grp;
+        return $assign;
     }
 }
 
+// SELECT t.`id`, t.`title`, t.`no_of_occupany`, t.`status`, t.`type_id`, t.`floor_id`, t.`user_id`, f.title as FTitle FROM tables as t, floors as f WHERE t.floor_id = f.id AND t.status = 0 AND t.restaurant_id = 1;
 
 // DB::table("where_subquery_group_3_ t")
 // ->select("min (id) as low", "max (id) as high", "@row_number", "@id")
@@ -224,7 +234,67 @@ GROUP BY num
 // ->get();
 
 
+// SELECT
+// CONCAT(MIN(`id`), ',', MAX(`id`)) AS AllId,
+// CONCAT(MIN(`title`), '-', MAX(`title`)) AS title
+// ,`no_of_occupany`,
+// REGEXP_REPLACE(`title`, '[^a-zA-Z]+$', '') as  mintit
+// FROM
+// (
+//     SELECT `title`,
+//         @row_number:=CASE
+//             WHEN @id = `no_of_occupany` or @mintit=REGEXP_REPLACE(`title`, '[^a-zA-Z ]+$', '') THEN @row_number
+//             ELSE @row_number + 1
+//         END AS num,
+//         @id:=`no_of_occupany` as no_of_occupany,
+//     	@mintit=REGEXP_REPLACE(`title`, '[^a-zA-Z ]', ''),
+    	
+//         id
+//     FROM tables, (SELECT @row_number:=0, @id := 1,@mintit:="") t
+//     WHERE `restaurant_id` = 1 
+//     ORDER BY id
+// ) t
+// GROUP BY num
+
 // SELECT COUNT(*),
 // CONCAT(MIN(`id`), ',', MAX(`id`)) AS AllId,
 // CONCAT(MIN(`title`), '-', MAX(`title`)) AS title, `no_of_occupany` FROM tables
 // WHERE `restaurant_id` = 1 GROUP BY `no_of_occupany`
+
+
+
+// // // working asa
+// SELECT
+// CONCAT(MIN(t.`id`), ',', MAX(t.`id`)) AS AllId,
+// CONCAT(MIN(t.`title`), '-', MAX(t.`title`)) AS title
+// , floors.`id`, floors.`title`,
+// REGEXP_REPLACE(t.`title`, '[^a-zA-Z]+$', '') as  mintit,
+// t.id,
+// no_of_occupany,
+// num
+// FROM floors, 
+// (
+//     SELECT tables.`title`,
+//         @row_number:=CASE
+//             WHEN @id = `no_of_occupany` THEN @row_number
+//             ELSE @row_number + 1
+//         END AS num,
+//         @id:=`no_of_occupany` as no_of_occupany,
+    	
+    	
+//         tables.id
+//     FROM tables, (SELECT @row_number:=0, @id := 1,@mintit:="") t
+//     WHERE `restaurant_id` = 1 
+//     ORDER BY id
+// ) t
+// GROUP BY mintit, num
+
+
+
+// SELECT
+// CONCAT(MIN(`id`), ',', MAX(`id`)) AS AllId,
+// CONCAT(MIN(`title`), '-', MAX(`title`)) AS title
+// ,`no_of_occupany`,
+// REGEXP_REPLACE(`title`, '[^a-zA-Z]+$', '') as  mintit
+// FROM tables
+// GROUP BY mintit

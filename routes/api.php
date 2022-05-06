@@ -95,6 +95,10 @@ Route::group(['middleware' => 'auth:sanctum'], function () {
   // grouping the table
   Route::get('group_table/{id?}', [TableController::class, 'groupTable']);
 
+  // assigning Tables
+  Route::get('assign_tables', [TableController::class, 'assignTable']);
+
+
   //get all the restaurants
   Route::get('getvendor_restaurant/{id?}', [RestaurantController::class, 'getvendor_restaurant']);
 
